@@ -40,7 +40,7 @@ namespace B2b_Api.Controllers
         {
             Sonuc sonuc = new Sonuc();
             CategoryService cs = new CategoryService();
-            sonuc = cs.KategoriEkle(model);
+            sonuc = cs.KategoriGuncelle(model);
             sonuc.servisUlasmaBasari = true;
             return sonuc;
         }

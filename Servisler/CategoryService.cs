@@ -363,6 +363,8 @@ namespace B2b_Api.Servisler
 
         public bool ParentExists(int parentId)
         {
+            if (parentId == 0)
+                return true;
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
