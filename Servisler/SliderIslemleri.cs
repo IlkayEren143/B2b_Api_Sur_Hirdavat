@@ -29,7 +29,7 @@ namespace B2b_Api.Servisler
         {
             try
             {
-                string komutstr = @"SELECT Id, Aktif, SiraNo, LinkAktif, Link From Slider";
+                string komutstr = @"SELECT Id, Aktif, SiraNo, LinkAktif, Link, ResimUrl From Slider";
                 komutstr += " " + eksorgu;
                 Ana_SQL_Islemleri asi = new Ana_SQL_Islemleri(si_baglanti, si_transaction, si_komutCalismaSuresi, hataLogDosyasiAdi);
                 DataTable tablo = new DataTable();
@@ -56,12 +56,13 @@ namespace B2b_Api.Servisler
         {
             try
             {
-                string komutstr = @"INSERT INTO Slider(Aktif, SiraNo, LinkAktif, Link) values (@Aktif, @SiraNo, @LinkAktif, @Link)";
+                string komutstr = @"INSERT INTO Slider(Aktif, SiraNo, LinkAktif, Link, ResimUrl) values (@Aktif, @SiraNo, @LinkAktif, @Link,@ResimUrl)";
                 SqlCommand komut = new SqlCommand(komutstr);
                 komut.Parameters.AddWithValue("@Aktif", sb.aktif);
                 komut.Parameters.AddWithValue("@SiraNo", sb.sirano);
                 komut.Parameters.AddWithValue("@LinkAktif", sb.linkaktif);
                 komut.Parameters.AddWithValue("@Link", sb.link);
+                komut.Parameters.AddWithValue("@ResimUrl", sb.resimUrl);
                 Ana_SQL_Islemleri asi = new Ana_SQL_Islemleri(si_baglanti, si_transaction, si_komutCalismaSuresi, hataLogDosyasiAdi);
                 bool sonuc = false;
                 if (si_transaction == null)
@@ -86,13 +87,14 @@ namespace B2b_Api.Servisler
         {
             try
             {
-                string komutstr = @"UPDATE Slider SET Aktif = @Aktif, SiraNo = @SiraNo, LinkAktif = @LinkAktif, Link = @Link";
+                string komutstr = @"UPDATE Slider SET Aktif = @Aktif, SiraNo = @SiraNo, LinkAktif = @LinkAktif, Link = @Link, ResimUrl = @ResimUrl";
                 komutstr += " " + eksorgu;
                 SqlCommand komut = new SqlCommand(komutstr);
                 komut.Parameters.AddWithValue("@Aktif", sb.aktif);
                 komut.Parameters.AddWithValue("@SiraNo", sb.sirano);
                 komut.Parameters.AddWithValue("@LinkAktif", sb.linkaktif);
                 komut.Parameters.AddWithValue("@Link", sb.link);
+                komut.Parameters.AddWithValue("@ResimUrl", sb.resimUrl);
                 Ana_SQL_Islemleri asi = new Ana_SQL_Islemleri(si_baglanti, si_transaction, si_komutCalismaSuresi, hataLogDosyasiAdi);
                 bool sonuc = false;
                 if (si_transaction == null)

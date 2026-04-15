@@ -18,6 +18,264 @@ namespace B2b_Api.Servisler
             sonuc.ekData = CariSayisiniBul();
             return sonuc;
         }
+        public Sonuc StokFiyatlariniCariListedenAl(List<StokKartBilgileri> skbListe,  string cariKodu)
+        {
+            Sonuc sonuc = new Sonuc();
+            List<ListedenStokFiyatBilgileri> fiyatListesi = CariListedenFiyatListesiniOku(cariKodu);
+            foreach (StokKartBilgileri skb in skbListe)
+            {
+                foreach (ListedenStokFiyatBilgileri sflb in fiyatListesi)
+                {
+                    if (skb.stokKodu == sflb.stokKodu)
+                    {
+                        skb.kalemIndirim1 = sflb.kalemIndirimYuzde1;
+                        skb.kalemIndirim2 = sflb.kalemIndirimYuzde2;
+                        skb.kalemIndirim3 = sflb.kalemIndirimYuzde3;
+                        skb.kalemIndirim4 = sflb.kalemIndirimYuzde4;
+                        skb.kalemIndirim5 = sflb.kalemIndirimYuzde5;
+                        skb.fiyat = sflb.fiyat;
+                        skb.fiyatNo = sflb.fiyatNo;
+                        skb.dovizKodu = sflb.dovizKodu;
+                        skb.dovizTuru = sflb.dovizTuru;
+                        skb.netFiyat = sflb.netFiyat;
+                        break;
+                    }
+                }
+            }
+            sonuc.sonuc = true;
+            sonuc.data = skbListe;
+            sonuc.mesaj = "Başarılı";
+            return sonuc;
+        }
+        private List<ListedenStokFiyatBilgileri> CariListedenFiyatListesiniOku(string cariKodu)
+        {
+            List<ListedenStokFiyatBilgileri> fiyatListesi = new List<ListedenStokFiyatBilgileri>();
+            DataTable tabloCariFiyat = CariFiyatListesiniAl(cariKodu);           
+            DataTable tabloStokFiyatPaket = new DataTable();
+            DataTable tabloStokGrup = new DataTable();
+            DataTable tabloStokKart = new DataTable();
+            if (tabloCariFiyat != null && tabloCariFiyat.Rows.Count > 0)
+            {
+                for (int i = 0; i < tabloCariFiyat.Rows.Count; ++i)
+                {
+                    if (tabloCariFiyat.Rows[i]["Stok Tipi"].ToString() == "3")
+                    {
+                        decimal kalemIndirimYuzde1 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 1"]);
+                        decimal kalemIndirimYuzde2 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 2"]);
+                        decimal kalemIndirimYuzde3 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 3"]);
+                        decimal kalemIndirimYuzde4 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 4"]);
+                        decimal kalemIndirimYuzde5 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 5"]);
+                        decimal fiyatNo = 0;
+                        try
+                        {
+                            fiyatNo = Convert.ToInt32(tabloCariFiyat.Rows[i]["Fiyat No"]);
+                        }
+                        catch (Exception)
+                        { }
+                        tabloStokFiyatPaket = StokFiyatPaketleriniOku(cariKodu);
+                        if (tabloStokFiyatPaket != null && tabloStokFiyatPaket.Rows.Count > 0)
+                        {
+                            for (int j = 0; j < tabloStokFiyatPaket.Rows.Count; ++j)
+                            {
+                                tabloStokFiyatPaket.Rows[j]["Fiyat No"] = fiyatNo > 0 ? fiyatNo : tabloStokFiyatPaket.Rows[j]["Fiyat No"];
+                                tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 1"] = kalemIndirimYuzde1 > 0 ? kalemIndirimYuzde1 : tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 1"];
+                                tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 2"] = kalemIndirimYuzde2 > 0 ? kalemIndirimYuzde2 : tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 2"];
+                                tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 3"] = kalemIndirimYuzde3 > 0 ? kalemIndirimYuzde3 : tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 3"];
+                                tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 4"] = kalemIndirimYuzde4 > 0 ? kalemIndirimYuzde4 : tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 4"];
+                                tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 5"] = kalemIndirimYuzde5 > 0 ? kalemIndirimYuzde5 : tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 5"];                                
+                            }
+                        }
+                    }
+                    if (tabloCariFiyat.Rows[i]["Stok Tipi"].ToString() == "2")
+                    {
+                        decimal kalemIndirimYuzde1 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 1"]);
+                        decimal kalemIndirimYuzde2 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 2"]);
+                        decimal kalemIndirimYuzde3 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 3"]);
+                        decimal kalemIndirimYuzde4 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 4"]);
+                        decimal kalemIndirimYuzde5 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 5"]);
+                        int fiyatNo = 0;
+                        try
+                        {
+                            fiyatNo = Convert.ToInt32(tabloCariFiyat.Rows[i]["Fiyat No"]);
+                        }
+                        catch (Exception)
+                        { }
+                        StokIslemleri si = new StokIslemleri();
+                        tabloStokGrup = si.StokGrupListesiniAl(tabloCariFiyat.Rows[i]["Stok Kodu"].ToString(), fiyatNo);
+                        if (tabloStokGrup != null && tabloStokGrup.Rows.Count > 0)
+                        {
+                            for (int k = 0; k < tabloStokGrup.Rows.Count; ++k)
+                            {
+                                tabloStokGrup.Rows[k]["Fiyat No"] = fiyatNo > 0 ? fiyatNo : tabloStokGrup.Rows[k]["Fiyat No"];
+                                tabloStokGrup.Rows[k]["İskonto Yüzde 1"] = kalemIndirimYuzde1 > 0 ? kalemIndirimYuzde1 : tabloStokGrup.Rows[k]["İskonto Yüzde 1"];
+                                tabloStokGrup.Rows[k]["İskonto Yüzde 2"] = kalemIndirimYuzde2 > 0 ? kalemIndirimYuzde2 : tabloStokGrup.Rows[k]["İskonto Yüzde 2"];
+                                tabloStokGrup.Rows[k]["İskonto Yüzde 3"] = kalemIndirimYuzde3 > 0 ? kalemIndirimYuzde3 : tabloStokGrup.Rows[k]["İskonto Yüzde 3"];
+                                tabloStokGrup.Rows[k]["İskonto Yüzde 4"] = kalemIndirimYuzde4 > 0 ? kalemIndirimYuzde4 : tabloStokGrup.Rows[k]["İskonto Yüzde 4"];
+                                tabloStokGrup.Rows[k]["İskonto Yüzde 5"] = kalemIndirimYuzde5 > 0 ? kalemIndirimYuzde5 : tabloStokGrup.Rows[k]["İskonto Yüzde 5"];
+                            }
+                        }
+                    }
+                }
+                tabloCariFiyat.DefaultView.RowFilter = "[Stok Tipi] = '1'";
+                tabloStokKart = tabloCariFiyat.DefaultView.ToTable();
+                tabloStokKart = ListedenGelenStokKartinaFiyatDovizBilgileriniEkleme(tabloStokKart);
+
+                for (int i = 0; i < tabloStokFiyatPaket.Rows.Count; ++i)
+                {
+                    ListedenStokFiyatBilgileri lsfb = new ListedenStokFiyatBilgileri();
+                    lsfb.stokKodu = tabloStokFiyatPaket.Rows[i]["Stok Kodu"].ToString();
+                    lsfb.fiyatNo = Convert.ToInt32(tabloStokFiyatPaket.Rows[i]["Fiyat No"]);
+                    lsfb.kalemIndirimYuzde1 = Convert.ToDecimal(tabloStokFiyatPaket.Rows[i]["İskonto Yüzde 1"]);
+                    lsfb.kalemIndirimYuzde2 = Convert.ToDecimal(tabloStokFiyatPaket.Rows[i]["İskonto Yüzde 2"]);
+                    lsfb.kalemIndirimYuzde3 = Convert.ToDecimal(tabloStokFiyatPaket.Rows[i]["İskonto Yüzde 3"]);
+                    lsfb.kalemIndirimYuzde4 = Convert.ToDecimal(tabloStokFiyatPaket.Rows[i]["İskonto Yüzde 4"]);
+                    lsfb.kalemIndirimYuzde5 = Convert.ToDecimal(tabloStokFiyatPaket.Rows[i]["İskonto Yüzde 5"]);
+                    lsfb.dovizKodu = tabloStokFiyatPaket.Rows[i]["Döviz Kodu"].ToString();
+                    lsfb.dovizTuru = tabloStokFiyatPaket.Rows[i]["Döviz Türü"].ToString();
+                    lsfb.fiyat= Convert.ToDecimal(tabloStokFiyatPaket.Rows[i]["Fiyat"]);
+                    decimal netFiyat = lsfb.fiyat; ;
+
+                    netFiyat *= (1 - lsfb.kalemIndirimYuzde1 / 100);
+                    netFiyat *= (1 - lsfb.kalemIndirimYuzde2 / 100);
+                    netFiyat *= (1 - lsfb.kalemIndirimYuzde3 / 100);
+                    netFiyat *= (1 - lsfb.kalemIndirimYuzde4 / 100);
+                    netFiyat *= (1 - lsfb.kalemIndirimYuzde5 / 100);
+                    lsfb.netFiyat = netFiyat;
+                    fiyatListesi.Add(lsfb);
+                }
+                for (int i = 0; i < tabloStokGrup.Rows.Count; ++i)
+                {
+                    bool kontrol = false;
+                    foreach (ListedenStokFiyatBilgileri bilgi in fiyatListesi)
+                    {
+                        if (bilgi.stokKodu == tabloStokGrup.Rows[i]["Stok Kodu"].ToString())
+                        {
+                            bilgi.fiyatNo = Convert.ToInt32(tabloStokGrup.Rows[i]["Fiyat No"]);
+                            bilgi.kalemIndirimYuzde1 = Convert.ToDecimal(tabloStokGrup.Rows[i]["İskonto Yüzde 1"]);
+                            bilgi.kalemIndirimYuzde2 = Convert.ToDecimal(tabloStokGrup.Rows[i]["İskonto Yüzde 2"]);
+                            bilgi.kalemIndirimYuzde3 = Convert.ToDecimal(tabloStokGrup.Rows[i]["İskonto Yüzde 3"]);
+                            bilgi.kalemIndirimYuzde4 = Convert.ToDecimal(tabloStokGrup.Rows[i]["İskonto Yüzde 4"]);
+                            bilgi.kalemIndirimYuzde5 = Convert.ToDecimal(tabloStokGrup.Rows[i]["İskonto Yüzde 5"]);
+                            bilgi.dovizKodu = tabloStokGrup.Rows[i]["Döviz Kodu"].ToString();
+                            bilgi.dovizTuru = tabloStokGrup.Rows[i]["Döviz Türü"].ToString();
+                            bilgi.fiyat = Convert.ToDecimal(tabloStokGrup.Rows[i]["Fiyat"]);
+                            decimal netFiyat = bilgi.fiyat; ;
+
+                            netFiyat *= (1 - bilgi.kalemIndirimYuzde1 / 100);
+                            netFiyat *= (1 - bilgi.kalemIndirimYuzde2 / 100);
+                            netFiyat *= (1 - bilgi.kalemIndirimYuzde3 / 100);
+                            netFiyat *= (1 - bilgi.kalemIndirimYuzde4 / 100);
+                            netFiyat *= (1 - bilgi.kalemIndirimYuzde5 / 100);
+                            bilgi.netFiyat = netFiyat;
+                            kontrol = true;
+                        }
+                    }
+                    if (!kontrol)
+                    {
+                        ListedenStokFiyatBilgileri lsfb = new ListedenStokFiyatBilgileri();
+                        lsfb.stokKodu = tabloStokGrup.Rows[i]["Stok Kodu"].ToString();
+                        lsfb.fiyatNo = Convert.ToInt32(tabloStokGrup.Rows[i]["Fiyat No"]);
+                        lsfb.kalemIndirimYuzde1 = Convert.ToDecimal(tabloStokGrup.Rows[i]["İskonto Yüzde 1"]);
+                        lsfb.kalemIndirimYuzde2 = Convert.ToDecimal(tabloStokGrup.Rows[i]["İskonto Yüzde 2"]);
+                        lsfb.kalemIndirimYuzde3 = Convert.ToDecimal(tabloStokGrup.Rows[i]["İskonto Yüzde 3"]);
+                        lsfb.kalemIndirimYuzde4 = Convert.ToDecimal(tabloStokGrup.Rows[i]["İskonto Yüzde 4"]);
+                        lsfb.kalemIndirimYuzde5 = Convert.ToDecimal(tabloStokGrup.Rows[i]["İskonto Yüzde 5"]);
+                        lsfb.dovizKodu = tabloStokGrup.Rows[i]["Döviz Kodu"].ToString();
+                        lsfb.dovizTuru = tabloStokGrup.Rows[i]["Döviz Türü"].ToString();
+                        lsfb.fiyat = Convert.ToDecimal(tabloStokGrup.Rows[i]["Fiyat"]);
+                        decimal netFiyat = lsfb.fiyat; ;
+
+                        netFiyat *= (1 - lsfb.kalemIndirimYuzde1 / 100);
+                        netFiyat *= (1 - lsfb.kalemIndirimYuzde2 / 100);
+                        netFiyat *= (1 - lsfb.kalemIndirimYuzde3 / 100);
+                        netFiyat *= (1 - lsfb.kalemIndirimYuzde4 / 100);
+                        netFiyat *= (1 - lsfb.kalemIndirimYuzde5 / 100);
+                        lsfb.netFiyat = netFiyat;
+                        fiyatListesi.Add(lsfb);
+                    }
+                }
+                for (int i = 0; i < tabloStokKart.Rows.Count; ++i)
+                {
+                    bool kontrol = false;
+                    foreach (ListedenStokFiyatBilgileri bilgi in fiyatListesi)
+                    {
+                        if (bilgi.stokKodu == tabloStokKart.Rows[i]["Stok Kodu"].ToString())
+                        {
+                            bilgi.fiyatNo = Convert.ToInt32(tabloStokKart.Rows[i]["Fiyat No"]);
+                            bilgi.kalemIndirimYuzde1 = Convert.ToDecimal(tabloStokKart.Rows[i]["İskonto Yüzde 1"]);
+                            bilgi.kalemIndirimYuzde2 = Convert.ToDecimal(tabloStokKart.Rows[i]["İskonto Yüzde 2"]);
+                            bilgi.kalemIndirimYuzde3 = Convert.ToDecimal(tabloStokKart.Rows[i]["İskonto Yüzde 3"]);
+                            bilgi.kalemIndirimYuzde4 = Convert.ToDecimal(tabloStokKart.Rows[i]["İskonto Yüzde 4"]);
+                            bilgi.kalemIndirimYuzde5 = Convert.ToDecimal(tabloStokKart.Rows[i]["İskonto Yüzde 5"]);
+                            bilgi.dovizKodu = tabloStokKart.Rows[i]["Döviz Kodu"].ToString();
+                            bilgi.dovizTuru = tabloStokKart.Rows[i]["Döviz Türü"].ToString();
+                            bilgi.fiyat = Convert.ToDecimal(tabloStokKart.Rows[i]["Fiyat"]);
+                            decimal netFiyat = bilgi.fiyat; ;
+
+                            netFiyat *= (1 - bilgi.kalemIndirimYuzde1 / 100);
+                            netFiyat *= (1 - bilgi.kalemIndirimYuzde2 / 100);
+                            netFiyat *= (1 - bilgi.kalemIndirimYuzde3 / 100);
+                            netFiyat *= (1 - bilgi.kalemIndirimYuzde4 / 100);
+                            netFiyat *= (1 - bilgi.kalemIndirimYuzde5 / 100);
+                            bilgi.netFiyat = netFiyat;
+                            kontrol = true;
+                        }
+                    }
+                    if (!kontrol)
+                    {
+                        ListedenStokFiyatBilgileri lsfb = new ListedenStokFiyatBilgileri();
+                        lsfb.stokKodu = tabloStokKart.Rows[i]["Stok Kodu"].ToString();
+                        lsfb.fiyatNo = Convert.ToInt32(tabloStokKart.Rows[i]["Fiyat No"]);
+                        lsfb.kalemIndirimYuzde1 = Convert.ToDecimal(tabloStokKart.Rows[i]["İskonto Yüzde 1"]);
+                        lsfb.kalemIndirimYuzde2 = Convert.ToDecimal(tabloStokKart.Rows[i]["İskonto Yüzde 2"]);
+                        lsfb.kalemIndirimYuzde3 = Convert.ToDecimal(tabloStokKart.Rows[i]["İskonto Yüzde 3"]);
+                        lsfb.kalemIndirimYuzde4 = Convert.ToDecimal(tabloStokKart.Rows[i]["İskonto Yüzde 4"]);
+                        lsfb.kalemIndirimYuzde5 = Convert.ToDecimal(tabloStokKart.Rows[i]["İskonto Yüzde 5"]);
+                        lsfb.dovizKodu = tabloStokKart.Rows[i]["Döviz Kodu"].ToString();
+                        lsfb.dovizTuru = tabloStokKart.Rows[i]["Döviz Türü"].ToString();
+                        lsfb.fiyat = Convert.ToDecimal(tabloStokKart.Rows[i]["Fiyat"]);
+                        decimal netFiyat = lsfb.fiyat; ;
+
+                        netFiyat *= (1 - lsfb.kalemIndirimYuzde1 / 100);
+                        netFiyat *= (1 - lsfb.kalemIndirimYuzde2 / 100);
+                        netFiyat *= (1 - lsfb.kalemIndirimYuzde3 / 100);
+                        netFiyat *= (1 - lsfb.kalemIndirimYuzde4 / 100);
+                        netFiyat *= (1 - lsfb.kalemIndirimYuzde5 / 100);
+                        lsfb.netFiyat = netFiyat;
+                        fiyatListesi.Add(lsfb);
+                    }
+                }
+            }
+            return fiyatListesi;
+        }
+        private DataTable CariFiyatListesiniAl(string cariKodu)
+        {
+            DataTable tablo = new DataTable();
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+            string komutstr = $"select CARFIYSTKTIP as [Stok Tipi], CARFIYSTKKOD as [Stok Kodu], CARFIYNO as [Fiyat No], CARFIYISKYUZ1 as [İskonto Yüzde 1], CARFIYISKYUZ2 as [İskonto Yüzde 2], CARFIYISKYUZ3 as [İskonto Yüzde 3], CARFIYISKYUZ4 as [İskonto Yüzde 4], CARFIYISKYUZ5 as [İskonto Yüzde 5] from {etaVeriTabani}..CARFIYAT WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM {etaVeriTabani}..CARKART WHERE CARKOD = '{cariKodu}') AND CARFIYKODTIP = 1 AND CARFIYITEMNO > 0 ";
+            SqlCommand komut = new SqlCommand(komutstr);
+            SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+            return asi.Komut_Adaptor(komut);
+        }
+        public DataTable StokFiyatPaketleriniOku(string cariKodu)
+        {
+            DataTable tablo = new DataTable();
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+            string komutstr = $"SELECT CARFIYSTKTIP AS [Stok Tipi], CARFIYSTKKOD AS [Stok Kodu], CARFIYNO AS [Fiyat No], ISNULL(STKFIYTUTAR, 0) as Fiyat, ISNULL(STKFIYDOVKOD, '') AS [Döviz Kodu], ISNULL(STKFIYDOVTUR, '') as [Döviz Türü], CARFIYISKYUZ1 AS [İskonto Yüzde 1], CARFIYISKYUZ2 AS [İskonto Yüzde 2], CARFIYISKYUZ3 AS [İskonto Yüzde 3], CARFIYISKYUZ4 as [İskonto Yüzde 4], CARFIYISKYUZ5 as [İskonto Yüzde 5] FROM {etaVeriTabani}..CARFIYAT LEFT JOIN (SELECT STKFIYSTKKOD, STKFIYNO, STKFIYTUTAR, STKFIYDOVKOD, STKFIYDOVTUR FROM {etaVeriTabani}..STKFIYAT) sf ON STKFIYSTKKOD = CARFIYSTKKOD AND STKFIYNO = CARFIYNO WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM {etaVeriTabani}..CARKART WHERE CARKOD = '{cariKodu}') AND CARFIYKODTIP = 2 AND CARFIYITEMNO > 0";
+            /*seLECT CARFIYSTKTIP AS [Stok Tipi], CARFIYSTKKOD AS [Stok Kodu], CARFIYNO AS [Fiyat No], ISNULL(STKFIYTUTAR, 0) as Fiyat, ISNULL(STKFIYDOVKOD, '') AS [Döviz Kodu], 
+ISNULL(STKFIYDOVTUR, '') as [Döviz Türü] , CARFIYISKYUZ1 AS [İskonto Yüzde 1], CARFIYISKYUZ2 AS [İskonto Yüzde 2], 
+CARFIYISKYUZ3 AS [İskonto Yüzde 3], CARFIYISKYUZ4 as [İskonto Yüzde 4], CARFIYISKYUZ5 as [İskonto Yüzde 5] 
+FROM CARFIYAT 
+LEFT JOIN (SELECT STKFIYSTKKOD, STKFIYNO, STKFIYTUTAR, STKFIYDOVKOD, STKFIYDOVTUR FROM STKFIYAT) sf ON STKFIYSTKKOD = CARFIYSTKKOD AND STKFIYNO = CARFIYNO
+WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001') AND CARFIYKODTIP = 2 AND CARFIYITEMNO > 0*/
+            SqlCommand komut = new SqlCommand(komutstr);
+            SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+            return asi.Komut_Adaptor(komut);
+        }
         private Sonuc CariKartlariniAl(SayfalamaBilgileri sb)
         {
             Sonuc sonuc = new Sonuc();
@@ -164,5 +422,28 @@ namespace B2b_Api.Servisler
 
             return eksorgu;
         }
+        private DataTable ListedenGelenStokKartinaFiyatDovizBilgileriniEkleme(DataTable tablo)
+        {
+            tablo.Columns.Add("Fiyat", typeof(decimal));
+            tablo.Columns.Add("Döviz Kodu");
+            tablo.Columns.Add("Döviz Türü");
+            StokIslemleri si = new StokIslemleri();
+            foreach(DataRow satir in tablo.Rows)
+            {
+                DataTable tabloListeStok = si.ListeStokKartListesiniAl(satir["Stok Kodu"].ToString(), Convert.ToInt32(satir["Fiyat No"]));
+                satir["Döviz Kodu"] = "";
+                satir["Döviz Türü"] = "";
+                satir["Fiyat"] = 0;
+                if (tabloListeStok != null && tabloListeStok.Rows.Count > 0)
+                {
+                    satir["Döviz Kodu"] = tabloListeStok.Rows[0]["Döviz Kodu"].ToString();
+                    satir["Döviz Türü"] = tabloListeStok.Rows[0]["Döviz Türü"].ToString();
+                    satir["Fiyat"] = Convert.ToDecimal(tabloListeStok.Rows[0]["Fiyat"]);
+                }
+            }
+            return tablo;
+        }
+       
+
     }
 }

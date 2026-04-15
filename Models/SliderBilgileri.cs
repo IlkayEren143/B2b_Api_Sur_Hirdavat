@@ -12,6 +12,7 @@ namespace B2b_Api.Models
         public int sirano { get; set; }
         public int linkaktif { get; set; }
         public string link { get; set; }
+        public string resimUrl { get; set; }
 
 
         public SliderBilgileri()
@@ -21,6 +22,7 @@ namespace B2b_Api.Models
             sirano = 0;
             linkaktif = 0;
             link = "";
+            resimUrl = "";
         }
     }
 

@@ -20,6 +20,33 @@ namespace B2b_Api.Servisler
             sonuc.ekData = sayac;
             return sonuc;
         }
+        public List<StokKartBilgileri> StokKartlariniListeOku(SayfalamaBilgileri sb)
+        {
+            List<StokKartBilgileri> skbListe = new List<StokKartBilgileri>();
+            
+            skbListe = (List<StokKartBilgileri>)StokKartlariniAl(sb).data;
+            return skbListe;
+        }
+        public DataTable StokGrupListesiniAl(string grupKodu, int fiyatNo)
+        {
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+            string komutstr = $" SELECT STKFIYSTKKOD as [Stok Kodu], STKFIYNO as [Fiyat No], STKFIYTUTAR as Fiyat, STKFIYISKYUZ1 as [İskonto Yüzde 1], STKFIYISKYUZ2 as [İskonto Yüzde 2], STKFIYISKYUZ3 as [İskonto Yüzde 3], STKFIYISKYUZ4 as [İskonto Yüzde 4], STKFIYISKYUZ5 as [İskonto Yüzde 5], STKFIYDOVKOD as [Döviz Kodu], STKFIYDOVTUR as [Döviz Türü] FROM {etaVeriTabani}..STKFIYAT LEFT JOIN (SELECT STKKOD, STKGRUPKOD FROM {etaVeriTabani}..STKKART) SK ON STKKOD = STKFIYSTKKOD WHERE STKFIYNO = {fiyatNo} AND STKGRUPKOD = '{grupKodu}'";
+            SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+            DataTable tablo = asi.Komut_Adaptor(new SqlCommand(komutstr));
+            return tablo;
+        }
+        public DataTable ListeStokKartListesiniAl(string stokKodu, int fiyatNo)
+        {
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+            string komutstr = $" SELECT STKFIYSTKKOD as [Stok Kodu], STKFIYNO as [Fiyat No], STKFIYTUTAR as Fiyat, STKFIYISKYUZ1 as [İskonto Yüzde 1], STKFIYISKYUZ2 as [İskonto Yüzde 2], STKFIYISKYUZ3 as [İskonto Yüzde 3], STKFIYISKYUZ4 as [İskonto Yüzde 4], STKFIYISKYUZ5 as [İskonto Yüzde 5], STKFIYDOVKOD as [Döviz Kodu], STKFIYDOVTUR as [Döviz Türü] FROM {etaVeriTabani}..STKFIYAT LEFT JOIN (SELECT STKKOD, STKGRUPKOD FROM {etaVeriTabani}..STKKART) SK ON STKKOD = STKFIYSTKKOD WHERE STKFIYNO = {fiyatNo} AND SK.STKKOD = '{stokKodu}'";
+            SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+            DataTable tablo = asi.Komut_Adaptor(new SqlCommand(komutstr));
+            return tablo;
+        }
         private Sonuc StokKartlariniAl(SayfalamaBilgileri sb, bool kriterCalissin = true)
         {
             Sonuc sonuc = new Sonuc();
@@ -41,6 +68,8 @@ namespace B2b_Api.Servisler
             komut.Parameters.AddWithValue("@veriTabaniAdi", etaVeriTabani);
             komut.Parameters.AddWithValue("@depoKodu", depoKodu);
             komut.Parameters.AddWithValue("@eksorgu", eksorgu);
+            komut.Parameters.AddWithValue("@fiyatNo", Convert.ToInt32(ConfigurationManager.AppSettings["fiyatNo"]));
+            komut.Parameters.AddWithValue("@etaMasterAdi", ConfigurationManager.AppSettings["etaMaster"].ToString());
 
             SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
             DataTable tablo = asi.Komut_Adaptor(komut);
@@ -74,16 +103,29 @@ namespace B2b_Api.Servisler
                 skb.bakiye = Convert.ToDecimal(tablo.Rows[i]["STKBAKIYE"]);
                 skb.birim = tablo.Rows[i]["STKBIRIM"].ToString();
                 skb.fiyat = Convert.ToDecimal(tablo.Rows[i]["STKFIYAT"]);
+                skb.dovizKodu = tablo.Rows[i]["STKDOVKOD"].ToString();
+                skb.dovizTuru = tablo.Rows[i]["STKDOVTUR"].ToString();
                 skb.kalemIndirim1 = Convert.ToDecimal(tablo.Rows[i]["STKISKYUZ1"]);
                 skb.kalemIndirim2 = Convert.ToDecimal(tablo.Rows[i]["STKISKYUZ2"]);
+                skb.kalemIndirim3 = Convert.ToDecimal(tablo.Rows[i]["STKISKYUZ3"]);
+                skb.kalemIndirim4 = Convert.ToDecimal(tablo.Rows[i]["STKISKYUZ4"]);
+                skb.kalemIndirim5 = Convert.ToDecimal(tablo.Rows[i]["STKISKYUZ5"]);
                 decimal kdvsizFiyat = skb.fiyat;
                 if (kdvFlag == 1)
                 {
                     kdvsizFiyat = skb.fiyat * 100 / 120;
                 }
-                decimal indirim1 = kdvsizFiyat * skb.kalemIndirim1 / 100;
-                decimal indirim2 = (kdvsizFiyat - indirim1) * skb.kalemIndirim2 / 100;
-                skb.netFiyat = kdvsizFiyat - indirim1 - indirim2;
+                skb.dovizKodu = tablo.Rows[i]["STKDOVKOD"].ToString();
+                skb.dovizTuru = tablo.Rows[i]["STKDOVTUR"].ToString();
+                skb.fiyat = Convert.ToDecimal(tablo.Rows[i]["STKFIYAT"]);
+                decimal netFiyat = skb.fiyat;
+
+                netFiyat *= (1 - skb.kalemIndirim1 / 100);
+                netFiyat *= (1 - skb.kalemIndirim2 / 100);
+                netFiyat *= (1 - skb.kalemIndirim3 / 100);
+                netFiyat *= (1 - skb.kalemIndirim4 / 100);
+                netFiyat *= (1 - skb.kalemIndirim5 / 100);
+                skb.netFiyat = netFiyat;
                 skb.kdvOrani = Convert.ToDecimal(tablo.Rows[i]["STKKDVORAN"]);
                 skb.ozelKod1 = tablo.Rows[i]["STKOZKOD1"].ToString();
                 skb.ozelKod2 = tablo.Rows[i]["STKOZKOD2"].ToString();
@@ -97,6 +139,7 @@ namespace B2b_Api.Servisler
                 skb.stokKodu = tablo.Rows[i]["STKKOD"].ToString();
                 skb.barkod = tablo.Rows[i]["STKBARKOD"].ToString();
                 skb.grupKodu = tablo.Rows[i]["STKGRUPKOD"].ToString();
+                skb.kur = 50;
                 skb.resimBase64 = "";
                 string dataTipi = ResminUzantisiniAl(tablo.Rows[i]["STKRESIMPATH"].ToString());
                 string dosya = tablo.Rows[i]["STKRESIMPATH"].ToString().Trim();
@@ -114,6 +157,107 @@ namespace B2b_Api.Servisler
             sonuc.mesaj = "Başarılı";
             return sonuc;
         }
+        //private List<StokKartBilgileri StokKartlariniListeAl(SayfalamaBilgileri sb, bool kriterCalissin = true)
+        //{
+        //    Sonuc sonuc = new Sonuc();
+        //    //Sonuc ayarSonuc = AyarBilgileriniAl();
+        //    //AyarBilgileri ab = (AyarBilgileri)ayarSonuc.data;
+        //    string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+        //    SqlConnection baglanti = new SqlConnection(baglantistr);
+        //    string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+        //    int kdvFlag = Convert.ToInt32(ConfigurationManager.AppSettings["kdvDahilFlag"]);
+        //    string depoKodu = ConfigurationManager.AppSettings["depoKodu"].ToString();
+        //    string eksorgu = "";
+        //    if (kriterCalissin)
+        //        eksorgu = StokKartKriterleriniOlustur(sb);
+        //    else
+        //        eksorgu = sb.ekSorgu;
+        //    SqlCommand komut = new SqlCommand();
+        //    komut.CommandType = System.Data.CommandType.StoredProcedure;
+        //    komut.CommandText = "StokKartlariniOku";
+        //    komut.Parameters.AddWithValue("@veriTabaniAdi", etaVeriTabani);
+        //    komut.Parameters.AddWithValue("@depoKodu", depoKodu);
+        //    komut.Parameters.AddWithValue("@eksorgu", eksorgu);
+
+        //    SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+        //    DataTable tablo = asi.Komut_Adaptor(komut);
+        //    if (tablo == null)
+        //    {
+        //        sonuc.data = null;
+        //        sonuc.sonuc = false;
+        //        sonuc.veriOkuBasari = false;
+        //        sonuc.mesaj = "Stok Kart tablosu okunamadı." + asi.hataMesaji;
+        //        return sonuc;
+        //    }
+        //    if (tablo.Rows.Count == 0)
+        //    {
+        //        sonuc.data = null;
+        //        sonuc.sonuc = false;
+        //        sonuc.veriOkuBasari = true;
+        //        sonuc.mesaj = "Kriterleri uyan Stok Kartları bulunamadı." + asi.hataMesaji;
+        //        return sonuc;
+        //    }
+        //    List<StokKartBilgileri> skbListe = new List<StokKartBilgileri>();
+        //    for (int i = 0; i < tablo.Rows.Count; ++i)
+        //    {
+
+        //        StokKartBilgileri skb = new StokKartBilgileri();
+
+        //        skb.aciklama1 = tablo.Rows[i]["STKACIK1"].ToString();
+        //        skb.aciklama2 = tablo.Rows[i]["STKACIK2"].ToString();
+        //        skb.aciklama3 = tablo.Rows[i]["STKACIK3"].ToString();
+        //        skb.aciklama4 = tablo.Rows[i]["STKACIK4"].ToString();
+        //        skb.aciklama5 = tablo.Rows[i]["STKACIK5"].ToString();
+        //        skb.bakiye = Convert.ToDecimal(tablo.Rows[i]["STKBAKIYE"]);
+        //        skb.birim = tablo.Rows[i]["STKBIRIM"].ToString();
+        //        skb.fiyat = Convert.ToDecimal(tablo.Rows[i]["STKFIYAT"]);
+        //        skb.dovizKodu = tablo.Rows[i]["STKDOVKOD"].ToString();
+        //        skb.dovizTuru = tablo.Rows[i]["STKDOVTUR"].ToString();
+        //        skb.kalemIndirim1 = Convert.ToDecimal(tablo.Rows[i]["STKISKYUZ1"]);
+        //        skb.kalemIndirim2 = Convert.ToDecimal(tablo.Rows[i]["STKISKYUZ2"]);
+        //        skb.kalemIndirim3 = Convert.ToDecimal(tablo.Rows[i]["STKISKYUZ3"]);
+        //        skb.kalemIndirim4 = Convert.ToDecimal(tablo.Rows[i]["STKISKYUZ4"]);
+        //        skb.kalemIndirim5 = Convert.ToDecimal(tablo.Rows[i]["STKISKYUZ5"]);
+        //        decimal kdvsizFiyat = skb.fiyat;
+        //        if (kdvFlag == 1)
+        //        {
+        //            kdvsizFiyat = skb.fiyat * 100 / 120;
+        //        }
+        //        decimal indirim1 = kdvsizFiyat * skb.kalemIndirim1 / 100;
+        //        decimal indirim2 = (kdvsizFiyat - indirim1) * skb.kalemIndirim2 / 100;
+        //        //çalışılacak
+        //        skb.netFiyat = kdvsizFiyat - indirim1 - indirim2;
+        //        skb.kdvOrani = Convert.ToDecimal(tablo.Rows[i]["STKKDVORAN"]);
+        //        skb.ozelKod1 = tablo.Rows[i]["STKOZKOD1"].ToString();
+        //        skb.ozelKod2 = tablo.Rows[i]["STKOZKOD2"].ToString();
+        //        skb.ozelKod3 = tablo.Rows[i]["STKOZKOD3"].ToString();
+        //        skb.ozelKod4 = tablo.Rows[i]["STKOZKOD4"].ToString();
+        //        skb.ozelKod5 = tablo.Rows[i]["STKOZKOD5"].ToString();
+        //        skb.resimBase64 = tablo.Rows[i]["STKRESIMPATH"].ToString();
+        //        skb.stokCinsi = tablo.Rows[i]["STKCINSI"].ToString();
+        //        skb.stokCinsi2 = tablo.Rows[i]["STKCINSI2"].ToString();
+        //        skb.stokCinsi3 = tablo.Rows[i]["STKCINSI3"].ToString();
+        //        skb.stokKodu = tablo.Rows[i]["STKKOD"].ToString();
+        //        skb.barkod = tablo.Rows[i]["STKBARKOD"].ToString();
+        //        skb.grupKodu = tablo.Rows[i]["STKGRUPKOD"].ToString();
+        //        skb.kur = 50;
+        //        skb.resimBase64 = "";
+        //        string dataTipi = ResminUzantisiniAl(tablo.Rows[i]["STKRESIMPATH"].ToString());
+        //        string dosya = tablo.Rows[i]["STKRESIMPATH"].ToString().Trim();
+        //        if (File.Exists(dosya))
+        //        {
+        //            byte[] bytes = File.ReadAllBytes(tablo.Rows[i]["STKRESIMPATH"].ToString());
+        //            skb.resimBase64 = Convert.ToBase64String(bytes);
+        //            skb.resimBase64 = $"data:{dataTipi};base64," + skb.resimBase64;
+        //        }
+        //        skbListe.Add(skb);
+        //    }
+        //    sonuc.sonuc = true;
+        //    sonuc.data = skbListe;
+        //    sonuc.veriOkuBasari = true;
+        //    sonuc.mesaj = "Başarılı";
+        //    return sonuc;
+        //}
         private string StokKartKriterleriniOlustur(SayfalamaBilgileri sb)
         {
             string eksorgu = "WHERE 1 = 1";

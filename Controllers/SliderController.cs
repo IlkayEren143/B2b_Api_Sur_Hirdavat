@@ -51,6 +51,7 @@ namespace B2b_Api.Controllers
                     sb.sirano = Convert.ToInt32(tablo.Rows[i]["SiraNo"]);
                     sb.linkaktif = Convert.ToInt32(tablo.Rows[i]["LinkAktif"]);
                     sb.link = tablo.Rows[i]["Link"].ToString();
+                    sb.resimUrl = tablo.Rows[i]["ResimUrl"].ToString();
                     sliderListesi.Add(sb);
                 }
                 sonuc.sonuc = true;
@@ -95,7 +96,7 @@ namespace B2b_Api.Controllers
             SqlConnection baglanti = new SqlConnection(baglantistr);
             SliderIslemleri si = new SliderIslemleri(baglanti);
             si.sb = sb;
-            bool duzenleSonuc = si.SliderDuzenle();
+            bool duzenleSonuc = si.SliderDuzenle($"WHERE Id = {sb.id}");
             if (duzenleSonuc)
             {
                 sonuc.sonuc = true;
@@ -119,7 +120,7 @@ namespace B2b_Api.Controllers
             string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
             SqlConnection baglanti = new SqlConnection(baglantistr);
             SliderIslemleri si = new SliderIslemleri(baglanti);
-            bool silSonuc = si.SliderSil($"WHERE Id = '{id}'");
+            bool silSonuc = si.SliderSil($"WHERE Id = {id}");
             if (silSonuc)
             {
                 sonuc.sonuc = true;
