@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XtraReportsLayoutSerializer SerializerVersion="18.2.16.0" Ref="1" ControlType="DevExpress.XtraReports.UI.XtraReport, DevExpress.XtraReports.v18.2, Version=18.2.16.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" Name="SurSepetDizayn" Margins="17, 31, 305, 100" PageWidth="850" PageHeight="1100" Version="18.2" DataMember="Hareket" DataSource="#Ref-0">
+  <Bands>
+    <Item1 Ref="2" ControlType="TopMarginBand" Name="TopMargin" HeightF="305.208344">
+      <Controls>
+        <Item1 Ref="3" ControlType="XRLabel" Name="label8" Multiline="true" Text="label8" SizeF="802,23" LocationFloat="0, 213.958359" Padding="2,2,0,0,96">
+          <ExpressionBindings>
+            <Item1 Ref="4" Expression="[Fiş].[CariUnvani]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item1>
+        <Item2 Ref="5" ControlType="XRLabel" Name="label7" Multiline="true" Text="label7" SizeF="270.833344,23" LocationFloat="0, 190.958344" Padding="2,2,0,0,96">
+          <ExpressionBindings>
+            <Item1 Ref="6" Expression="[Fiş].[CariKodu]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item2>
+        <Item3 Ref="7" ControlType="XRLabel" Name="label6" Multiline="true" Text="label6" SizeF="153.125,23.0000038" LocationFloat="648.875, 122.874992" Padding="2,2,0,0,96">
+          <ExpressionBindings>
+            <Item1 Ref="8" Expression="[TeklifNo]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item3>
+        <Item4 Ref="9" ControlType="XRLabel" Name="label5" TextFormatString="{0:d}" Multiline="true" Text="label5" SizeF="100,23" LocationFloat="702, 99.87501" Padding="2,2,0,0,96">
+          <ExpressionBindings>
+            <Item1 Ref="10" Expression="[Tarih]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item4>
+      </Controls>
+    </Item1>
+    <Item2 Ref="11" ControlType="DetailBand" Name="Detail" HeightF="23">
+      <Controls>
+        <Item1 Ref="12" ControlType="XRLabel" Name="label9" Multiline="true" Text="label9" SizeF="71.875,23" LocationFloat="630.125, 0" Padding="2,2,0,0,96">
+          <ExpressionBindings>
+            <Item1 Ref="13" Expression="[Birim]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item1>
+        <Item2 Ref="14" ControlType="XRLabel" Name="label4" TextFormatString="{0:n3}" Multiline="true" Text="label4" TextAlignment="TopRight" SizeF="100,23" LocationFloat="530.125, 0" Padding="2,2,0,0,96">
+          <ExpressionBindings>
+            <Item1 Ref="15" Expression="[Miktar]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item2>
+        <Item3 Ref="16" ControlType="XRLabel" Name="label3" TextFormatString="{0:n2}" Multiline="true" Text="label3" TextAlignment="TopRight" SizeF="100,23" LocationFloat="702, 0" Padding="2,2,0,0,96">
+          <ExpressionBindings>
+            <Item1 Ref="17" Expression="[Fiyat]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item3>
+        <Item4 Ref="18" ControlType="XRLabel" Name="label2" Multiline="true" Text="label2" SizeF="430.125,23" LocationFloat="100.000008, 0" Padding="2,2,0,0,100">
+          <ExpressionBindings>
+            <Item1 Ref="19" Expression="[Hareket].[StokCinsi]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item4>
+        <Item5 Ref="20" ControlType="XRLabel" Name="label1" Multiline="true" Text="label1" SizeF="100,23" LocationFloat="0, 0" Padding="2,2,0,0,100">
+          <ExpressionBindings>
+            <Item1 Ref="21" Expression="[Hareket].[StokKodu]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item5>
+      </Controls>
+    </Item2>
+    <Item3 Ref="22" ControlType="BottomMarginBand" Name="BottomMargin" />
+  </Bands>
+  <ObjectStorage>
+    <Item1 ObjectType="DevExpress.XtraReports.Serialization.ObjectStorageInfo, DevExpress.XtraReports.v18.2" Ref="0" Content="~Xtra#NULL" Type="System.Data.DataSet" />
+  </ObjectStorage>
+</XtraReportsLayoutSerializer>

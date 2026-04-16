@@ -5,12 +5,15 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Util;
+using DevExpress.XtraPrinting;
+using System.Drawing.Printing;
 using static B2b_Api.Models.Evrak;
 using Sonuc = B2b_Api.Models.Sonuc;
-
+using DevExpress.XtraReports.UI;
 
 namespace B2b_Api.Servisler
 {
@@ -686,7 +689,73 @@ namespace B2b_Api.Servisler
         public Sonuc SepetEkle(TeklifEvrakBilgileri evrak)
         {
             evrak.tfb.fistipi = 0;
+            if (evrak.tfb.id == 0)
+            {
+                Sonuc sonuc = new Sonuc();
+                string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+                SqlConnection baglanti = new SqlConnection(baglantistr);
+                TeklifFisIslemleri tfi = new TeklifFisIslemleri(baglanti);
+                string ekSorgu = $"WHERE CariKodu = '{evrak.tfb.carikodu}' AND FisTipi = 0";
+                DataTable tablo = tfi.TeklifFisOku(ekSorgu);
+                if (tablo == null)
+                {
+                    sonuc.sonuc = false;
+                    sonuc.veriOkuBasari = false;
+                    sonuc.mesaj = "Fiş tablosu okunamadı. " + tfi.hataMesaji;
+                    return sonuc;
+                }
+                if (tablo.Rows.Count > 0)
+                {
+                    sonuc.sonuc = false;
+                    sonuc.veriOkuBasari = true;
+                    sonuc.mesaj = "İlgili cari kartın daha önceden kalma sepeti bulunmakta. Ya sepeti silin ya da sepeti çağırın.";
+                    return sonuc;
+                }
+            }
             return TeklifKaydet(evrak);
+        }
+        public Sonuc SepetPDFAl(int teklifId)
+        {
+            return TeklifPDFOlustur(teklifId);
+        }
+        public Sonuc SepetSil(string cariKodu)
+        {
+            Sonuc sonuc = new Sonuc();
+            sonuc = SepetOku(cariKodu);
+            if (!sonuc.sonuc)
+                return sonuc;
+            TeklifEvrakBilgileri evrak = sonuc.data as TeklifEvrakBilgileri;
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            baglanti.Open();
+            SqlTransaction transaction = baglanti.BeginTransaction();
+            TeklifHareketIslemleri thi = new TeklifHareketIslemleri(baglanti, transaction);
+            if (!thi.TeklifHareketSil($"WHERE Fisid = {evrak.tfb.id}"))
+            {
+                transaction.Rollback();
+                baglanti.Close();
+                sonuc.sonuc = false;
+                sonuc.mesaj = "Hareket tablosu silinemedi. " + thi.hataMesaji;
+                sonuc.veriOkuBasari = false;
+                return sonuc;
+            }
+            TeklifFisIslemleri tfi = new TeklifFisIslemleri(baglanti, transaction);
+            if (!tfi.TeklifFisSil($"WHERE id = {evrak.tfb.id}"))
+            {
+                transaction.Rollback();
+                baglanti.Close();
+                sonuc.sonuc = false;
+                sonuc.mesaj = "Fiş tablosu silinemedi. " + thi.hataMesaji;
+                sonuc.veriOkuBasari = false;
+                return sonuc;
+            }
+            transaction.Commit();
+            baglanti.Close();
+            sonuc.sonuc = true;
+            sonuc.veriOkuBasari = true;
+            sonuc.data = evrak;
+            sonuc.mesaj = "Başarılı";
+            return sonuc;
         }
         private Sonuc TeklifKaydet(TeklifEvrakBilgileri evrak)
         {
@@ -1025,6 +1094,64 @@ namespace B2b_Api.Servisler
                 return 0;
             }
         }
-       
+        private Sonuc TeklifPDFOlustur(int id)
+        {
+            Sonuc sonuc = new Sonuc();
+            DataSet ds = SepetEvraginiAl(id);
+            if (ds == null)
+            {
+                sonuc.sonuc = false;
+                sonuc.veriOkuBasari = false;
+                sonuc.data = null;
+                sonuc.ekData = null;
+                sonuc.mesaj = "Teklif evrak bulunamadı.";
+                return sonuc;
+            }
+            string mappedPath = System.Web.Hosting.HostingEnvironment.MapPath("~/Dizayn");
+            string dizynDosyasi = mappedPath + "\\" + "SurSepetDizayn" + ".repx";
+            XtraReport rapor = new XtraReport();
+            rapor.LoadLayoutFromXml(dizynDosyasi);
+            rapor.DataSource = ds;
+            rapor.ExportToPdf(Path.GetDirectoryName(dizynDosyasi) + "//SurSepetDizayn.pdf");
+            FileStream file = new FileStream(Path.GetDirectoryName(dizynDosyasi) + "//SurSepetDizayn.pdf", FileMode.Open, FileAccess.Read);
+            byte[] bytes = new byte[file.Length];
+            file.Read(bytes, 0, (int)file.Length);
+            file.Close();
+
+            if (bytes == null)
+            {
+                sonuc.sonuc = false;
+                sonuc.data = null;
+                sonuc.mesaj = "Tahsilat Makbuzu okunamadı";
+                return sonuc;
+            }
+            if (bytes.Length == 0)
+            {
+                sonuc.sonuc = false;
+                sonuc.data = null;
+                sonuc.mesaj = "Tahsilat Makbuzu bulunamadı";
+                return sonuc;
+            }
+            sonuc.sonuc = true;
+            sonuc.data = bytes;
+            sonuc.mesaj = "Başarılı.";
+            return sonuc;
+        }
+        private DataSet SepetEvraginiAl(int id)
+        {
+            SqlConnection baglanti = new SqlConnection(ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString);
+            SqlCommand komut = new SqlCommand();
+            komut.CommandType = CommandType.StoredProcedure;
+            komut.CommandText = "SepetAl";
+            komut.Parameters.AddWithValue("@teklifId", id);
+            Ana_SQL_Islemleri asi = new Ana_SQL_Islemleri(baglanti);
+            DataSet ds = asi.KomutDS_Adaptor(komut);
+            if (ds == null)
+                return null;
+            ds.Tables[1].TableName = "Fiş";
+            ds.Tables[0].TableName = "Hareket";
+            return ds;
+        }
+
     }
 }

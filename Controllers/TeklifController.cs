@@ -75,5 +75,28 @@ namespace B2b_Api.Controllers
             sonuc.servisUlasmaBasari = true;
             return sonuc;
         }
+        [HttpGet]
+        [Route("SepetiSil/{cariKodu}")]
+        public Sonuc GetSepetiSil(string cariKodu)
+        {
+
+            Sonuc sonuc = new Sonuc();
+            TeklifIslemleri ti = new TeklifIslemleri();
+            sonuc = ti.SepetSil(cariKodu);
+            sonuc.servisUlasmaBasari = true;
+            return sonuc;
+        }
+        [HttpGet]
+        [Route("SepetPDFAl/{teklifId}")]
+
+        public Sonuc GetSepetPDFAl([FromUri] int teklifId)
+        {
+            Sonuc sonuc = new Sonuc();
+            TeklifIslemleri ti = new TeklifIslemleri();
+            sonuc = ti.SepetPDFAl(teklifId);
+            sonuc.servisUlasmaBasari = true;
+            return sonuc;
+
+        }
     }
 }
