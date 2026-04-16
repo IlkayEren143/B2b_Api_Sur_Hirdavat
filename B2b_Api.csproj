@@ -128,6 +128,10 @@
       <Private>True</Private>
       <HintPath>packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="Yardimci ETA Islemleri, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Güncel server programları\WebApiElTerminali\Yeni SQL ve ETA DLL'leri ve Test Programı (Decimal)\Yardimci ETA Islemleri\Yardimci ETA Islemleri\bin\Debug\Yardimci ETA Islemleri.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
@@ -172,20 +176,24 @@
     <Compile Include="Controllers\CategoriesController.cs" />
     <Compile Include="Controllers\SliderController.cs" />
     <Compile Include="Controllers\StokController.cs" />
+    <Compile Include="Controllers\TeklifController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\CariKartBilgileri.cs" />
     <Compile Include="Models\Category.cs" />
+    <Compile Include="Models\Evrak.cs" />
     <Compile Include="Models\SayfalamaBilgileri.cs" />
     <Compile Include="Models\SliderBilgileri.cs" />
     <Compile Include="Models\SonucIslemleri.cs" />
     <Compile Include="Models\StokKartBilgileri.cs" />
+    <Compile Include="Models\TeklifBilgileri.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Servisler\CariIslemler.cs" />
     <Compile Include="Servisler\CategoryService.cs" />
     <Compile Include="Servisler\SliderIslemleri.cs" />
     <Compile Include="Servisler\StokIslemleri.cs" />
+    <Compile Include="Servisler\TeklifIslemleri.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />

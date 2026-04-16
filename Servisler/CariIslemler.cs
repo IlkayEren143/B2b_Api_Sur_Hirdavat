@@ -18,7 +18,7 @@ namespace B2b_Api.Servisler
             sonuc.ekData = CariSayisiniBul();
             return sonuc;
         }
-        public Sonuc StokFiyatlariniCariListedenAl(List<StokKartBilgileri> skbListe,  string cariKodu)
+        public Sonuc StokFiyatlariniCariListedenAl(List<StokKartBilgileri> skbListe, string cariKodu)
         {
             Sonuc sonuc = new Sonuc();
             List<ListedenStokFiyatBilgileri> fiyatListesi = CariListedenFiyatListesiniOku(cariKodu);
@@ -47,10 +47,28 @@ namespace B2b_Api.Servisler
             sonuc.mesaj = "Başarılı";
             return sonuc;
         }
+        public DataRow CariAdresBilgileriniAl(string cariKodu)
+        {
+            DataTable tablo = new DataTable();
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+            string komutstr = $@"SELECT CARVERDAIRE, CARVERHESNO, ISNULL(ADRADRES1, '') AS ADRADRES1, ISNULL(ADRADRES2, '') AS ADRADRES2, ISNULL(ADRADRES3, '') AS ADRADRES3, ıSNULL(ADREMAIL1, '') AS ADREMAIL1, ISNULL(ADRIL, '') AS ADRIL, ISNULL(ADRILCE, '') AS ADRILCE, ISNULL(ADRULKE, '') AS ADRULKE FROM {etaVeriTabani}..CARKART LEFT JOIN(SELECT ADRADRES1, ADRADRES2, ADRADRES3, ADREMAIL1, ADRIL, ADRILCE, ADRULKE, ADRKOD1 FROM ADRESLER) {etaVeriTabani}..ADRESLER ON ADRESLER.ADRKOD1 = CARKOD WHERE CARKOD = '{cariKodu}'";
+            SqlCommand komut = new SqlCommand(komutstr);
+            SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+            tablo = asi.Komut_Adaptor(komut);
+            if (tablo != null && tablo.Rows.Count > 0)
+            {
+                return tablo.Rows[0];
+            }
+            return null;
+
+
+        }
         private List<ListedenStokFiyatBilgileri> CariListedenFiyatListesiniOku(string cariKodu)
         {
             List<ListedenStokFiyatBilgileri> fiyatListesi = new List<ListedenStokFiyatBilgileri>();
-            DataTable tabloCariFiyat = CariFiyatListesiniAl(cariKodu);           
+            DataTable tabloCariFiyat = CariFiyatListesiniAl(cariKodu);
             DataTable tabloStokFiyatPaket = new DataTable();
             DataTable tabloStokGrup = new DataTable();
             DataTable tabloStokKart = new DataTable();
@@ -82,7 +100,7 @@ namespace B2b_Api.Servisler
                                 tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 2"] = kalemIndirimYuzde2 > 0 ? kalemIndirimYuzde2 : tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 2"];
                                 tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 3"] = kalemIndirimYuzde3 > 0 ? kalemIndirimYuzde3 : tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 3"];
                                 tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 4"] = kalemIndirimYuzde4 > 0 ? kalemIndirimYuzde4 : tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 4"];
-                                tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 5"] = kalemIndirimYuzde5 > 0 ? kalemIndirimYuzde5 : tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 5"];                                
+                                tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 5"] = kalemIndirimYuzde5 > 0 ? kalemIndirimYuzde5 : tabloStokFiyatPaket.Rows[j]["İskonto Yüzde 5"];
                             }
                         }
                     }
@@ -132,7 +150,7 @@ namespace B2b_Api.Servisler
                     lsfb.kalemIndirimYuzde5 = Convert.ToDecimal(tabloStokFiyatPaket.Rows[i]["İskonto Yüzde 5"]);
                     lsfb.dovizKodu = tabloStokFiyatPaket.Rows[i]["Döviz Kodu"].ToString();
                     lsfb.dovizTuru = tabloStokFiyatPaket.Rows[i]["Döviz Türü"].ToString();
-                    lsfb.fiyat= Convert.ToDecimal(tabloStokFiyatPaket.Rows[i]["Fiyat"]);
+                    lsfb.fiyat = Convert.ToDecimal(tabloStokFiyatPaket.Rows[i]["Fiyat"]);
                     decimal netFiyat = lsfb.fiyat; ;
 
                     netFiyat *= (1 - lsfb.kalemIndirimYuzde1 / 100);
@@ -428,7 +446,7 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
             tablo.Columns.Add("Döviz Kodu");
             tablo.Columns.Add("Döviz Türü");
             StokIslemleri si = new StokIslemleri();
-            foreach(DataRow satir in tablo.Rows)
+            foreach (DataRow satir in tablo.Rows)
             {
                 DataTable tabloListeStok = si.ListeStokKartListesiniAl(satir["Stok Kodu"].ToString(), Convert.ToInt32(satir["Fiyat No"]));
                 satir["Döviz Kodu"] = "";
@@ -443,7 +461,6 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
             }
             return tablo;
         }
-       
-
+        
     }
 }
