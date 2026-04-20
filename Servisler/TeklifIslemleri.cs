@@ -14,6 +14,9 @@ using System.Drawing.Printing;
 using static B2b_Api.Models.Evrak;
 using Sonuc = B2b_Api.Models.Sonuc;
 using DevExpress.XtraReports.UI;
+using System.Net;
+using System.Net.Mail;
+using System.Threading.Tasks;
 
 namespace B2b_Api.Servisler
 {
@@ -757,6 +760,41 @@ namespace B2b_Api.Servisler
             sonuc.mesaj = "Başarılı";
             return sonuc;
         }
+        public async Task<Sonuc> SepetMailYolla(string cariKodu)
+        {
+            Sonuc sonuc = new Sonuc();
+            sonuc = SepetOku(cariKodu);
+            if (!sonuc.sonuc)
+            {
+                return sonuc;
+            }
+            TeklifEvrakBilgileri evrak = sonuc.data as TeklifEvrakBilgileri;
+            CariIslemler ci = new CariIslemler();
+            DataRow satir = ci.CariAdresBilgileriniAl(cariKodu);
+            if (satir == null)
+            {
+                sonuc.sonuc = false;
+                sonuc.data = null;
+                sonuc.mesaj = "Cari kart tablosu okunamadı. ";
+                sonuc.veriOkuBasari = false;
+                return sonuc;
+            }
+            string eMail1 = satir["ADREMAIL1"].ToString();
+            string email2 = satir["ADREMAIL2"].ToString();
+            sonuc = TeklifPDFOlustur(evrak.tfb.id);
+            MailEvrak mailEvrak = new MailEvrak();
+            mailEvrak.hedefMail = eMail1;
+            mailEvrak.hedefCCMail = new string[] { email2 };
+            mailEvrak.baslik = "Sur Teknik Hırdavat Teklif bilgilendirmesi.";
+            mailEvrak.mailBody = $@"Sayın {evrak.tfb.cariunvani} <br><br>
+                                    {evrak.tfb.tarih.ToString("dd.MM.yyyy")} tarihli teklif evrağı ektedir. Lütfen kontrol ediniz.  İlgili teklif size ait değilse en kısa zamanda bize bilgi veriniz. <br><br>
+                                    Saygılarımızla<br>
+                                    Sur Teknik Hırdavat";
+            mailEvrak.isHTML = true;
+            mailEvrak.attachment = new Attachment(sonuc.ekData.ToString());
+            sonuc = await MailYolla(mailEvrak);
+            return sonuc;
+        }
         private Sonuc TeklifKaydet(TeklifEvrakBilgileri evrak)
         {
 
@@ -882,8 +920,7 @@ namespace B2b_Api.Servisler
            sonuc.ekData = evrak.tfb.id;
             
             return sonuc;
-        }
-        
+        }  
         private TeklifFisBilgileri TekliffisBilfgileriniDuzelt(TeklifFisBilgileri tfb)
         {
             CariIslemler ci = new CariIslemler();
@@ -942,7 +979,6 @@ namespace B2b_Api.Servisler
             }
             tfb.geneltoplam = tfb.aratoplam + tfb.kdvtoplam;
         }
-
         private string TeklifKriterleriniAl(SayfalamaBilgileri sb)
         {
             string eksorgu = "WHERE 1 = 1";
@@ -1112,8 +1148,8 @@ namespace B2b_Api.Servisler
             XtraReport rapor = new XtraReport();
             rapor.LoadLayoutFromXml(dizynDosyasi);
             rapor.DataSource = ds;
-            rapor.ExportToPdf(Path.GetDirectoryName(dizynDosyasi) + "//SurSepetDizayn.pdf");
-            FileStream file = new FileStream(Path.GetDirectoryName(dizynDosyasi) + "//SurSepetDizayn.pdf", FileMode.Open, FileAccess.Read);
+            rapor.ExportToPdf(Path.GetDirectoryName(dizynDosyasi) + $"//Evrak_{id}.pdf");
+            FileStream file = new FileStream(Path.GetDirectoryName(dizynDosyasi) + $"//Evrak_{id}.pdf", FileMode.Open, FileAccess.Read);
             byte[] bytes = new byte[file.Length];
             file.Read(bytes, 0, (int)file.Length);
             file.Close();
@@ -1134,6 +1170,7 @@ namespace B2b_Api.Servisler
             }
             sonuc.sonuc = true;
             sonuc.data = bytes;
+            sonuc.ekData = Path.GetDirectoryName(dizynDosyasi) + $"//Evrak_{id}.pdf";
             sonuc.mesaj = "Başarılı.";
             return sonuc;
         }
@@ -1151,6 +1188,87 @@ namespace B2b_Api.Servisler
             ds.Tables[1].TableName = "Fiş";
             ds.Tables[0].TableName = "Hareket";
             return ds;
+        }
+        private async Task<Sonuc> MailYolla(MailEvrak evrak)
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            evrak.gondericiMail = ConfigurationManager.AppSettings["gondericiMail"].ToString();
+            evrak.hostAdi = ConfigurationManager.AppSettings["hostAdi"].ToString();
+            evrak.mailSifre = ConfigurationManager.AppSettings["sifre"].ToString();
+            evrak.ssl = Convert.ToBoolean(ConfigurationManager.AppSettings["ssl"].ToString());
+            evrak.portNo = Convert.ToInt32(ConfigurationManager.AppSettings["portNo"]);
+            int sayac = 0;
+            Sonuc sonuc = new Sonuc();
+            try
+            {
+                sayac++;
+                MailMessage mail = new MailMessage(); sayac++;
+                mail.From = new MailAddress(evrak.gondericiMail); sayac++;
+                mail.To.Add(evrak.hedefMail); sayac++;
+                if (evrak.hedefCCMail != null)
+                {
+                    foreach (string hedefCCMail in evrak.hedefCCMail)
+                        if (!hedefCCMail.Trim().Equals(""))
+                            mail.CC.Add(hedefCCMail);
+                    if (!string.IsNullOrEmpty(evrak.ekMail1))
+                        mail.CC.Add(evrak.ekMail1);
+                    if (!string.IsNullOrEmpty(evrak.ekMail2))
+                        mail.CC.Add(evrak.ekMail2);
+                }
+                sayac++;
+                mail.Subject = evrak.baslik; sayac++;
+                mail.Body = evrak.mailBody; sayac++;
+                mail.IsBodyHtml = evrak.isHTML; sayac++;
+                if (!string.IsNullOrEmpty(evrak.attachmentUri))
+                {
+                    byte[] fileBytes; sayac++;
+                    using (WebClient client = new WebClient())
+                    {
+                        fileBytes = await client.DownloadDataTaskAsync(evrak.attachmentUri);
+                    }
+                    sayac++;
+                    string fileName = Path.GetFileName(new Uri(evrak.attachmentUri).LocalPath); sayac++;
+                    MemoryStream ms = new MemoryStream(fileBytes); sayac++;
+                    Attachment attachment = new Attachment(ms, fileName); sayac++;
+                    mail.Attachments.Add(attachment); sayac++;
+                }
+                if (evrak.attachment != null)
+                {
+                    mail.Attachments.Add(evrak.attachment);
+                }
+                //SmtpClient smtp = new SmtpClient(evrak.hostAdi, 587);
+                //smtp.Credentials = new System.Net.NetworkCredential(evrak.gondericiMail, evrak.mailSifre);
+                //smtp.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network;
+                ////smtp.UseDefaultCredentials = false;
+                //smtp.EnableSsl = evrak.ssl;
+                //smtp.Send(mail);
+                using (SmtpClient client = new SmtpClient())
+                {
+                    client.Host = evrak.hostAdi; sayac++;
+                    client.Port = evrak.portNo; sayac++;
+                    client.EnableSsl = evrak.ssl; sayac++;
+                    client.DeliveryMethod = SmtpDeliveryMethod.Network; sayac++;
+                    client.UseDefaultCredentials = false; sayac++;
+                    client.Credentials = new NetworkCredential(evrak.gondericiMail, evrak.mailSifre); sayac++;
+                    client.Send(mail); sayac++;
+                }
+
+                sonuc.sonuc = true;
+                sonuc.mesaj = "Başarılı";
+            }
+            catch (SmtpException smtpEx)
+            {
+                sonuc.mesaj = $"SMTP Hatası: {smtpEx.StatusCode} - {smtpEx.Message}";
+                sonuc.sonuc = false;
+            }
+            catch (Exception ex)
+            {
+                sonuc.mesaj = ex.Message;
+                sonuc.sonuc = false;
+                sonuc.data = evrak;
+            }
+            sonuc.data = sayac;
+            return sonuc;
         }
 
     }

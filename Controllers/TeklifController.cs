@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using static B2b_Api.Models.Evrak;
 
@@ -97,6 +98,16 @@ namespace B2b_Api.Controllers
             sonuc.servisUlasmaBasari = true;
             return sonuc;
 
+        }
+        [HttpGet]
+        [Route("SepetMailGonder/{cariKodu}")]
+        public async Task<Sonuc> GetSepetMailGonder(string cariKodu)
+        {
+            Sonuc sonuc = new Sonuc();
+            TeklifIslemleri ti = new TeklifIslemleri();
+            sonuc = await ti.SepetMailYolla(cariKodu);
+            sonuc.servisUlasmaBasari = true;
+            return sonuc;
         }
     }
 }

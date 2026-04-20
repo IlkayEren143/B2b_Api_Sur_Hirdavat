@@ -53,7 +53,7 @@ namespace B2b_Api.Servisler
             string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
             SqlConnection baglanti = new SqlConnection(baglantistr);
             string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
-            string komutstr = $@"SELECT CARVERDAIRE, CARVERHESNO, ISNULL(ADRADRES1, '') AS ADRADRES1, ISNULL(ADRADRES2, '') AS ADRADRES2, ISNULL(ADRADRES3, '') AS ADRADRES3, ıSNULL(ADREMAIL1, '') AS ADREMAIL1, ISNULL(ADRIL, '') AS ADRIL, ISNULL(ADRILCE, '') AS ADRILCE, ISNULL(ADRULKE, '') AS ADRULKE FROM {etaVeriTabani}..CARKART LEFT JOIN(SELECT ADRADRES1, ADRADRES2, ADRADRES3, ADREMAIL1, ADRIL, ADRILCE, ADRULKE, ADRKOD1 FROM ADRESLER) {etaVeriTabani}..ADRESLER ON ADRESLER.ADRKOD1 = CARKOD WHERE CARKOD = '{cariKodu}'";
+            string komutstr = $@"SELECT CARVERDAIRE, CARVERHESNO, ISNULL(ADRADRES1, '') AS ADRADRES1, ISNULL(ADRADRES2, '') AS ADRADRES2, ISNULL(ADRADRES3, '') AS ADRADRES3, ISNULL(ADREMAIL1, '') AS ADREMAIL1, ISNULL(ADREMAIL2, '') AS ADREMAIL2, ISNULL(ADRIL, '') AS ADRIL, ISNULL(ADRILCE, '') AS ADRILCE, ISNULL(ADRULKE, '') AS ADRULKE FROM {etaVeriTabani}..CARKART LEFT JOIN(SELECT ADRADRES1, ADRADRES2, ADRADRES3, ADREMAIL1, ADREMAIL2, ADRIL, ADRILCE, ADRULKE, ADRKOD1 FROM  {etaVeriTabani}..ADRESLER) ADRESLER ON ADRESLER.ADRKOD1 = CARKOD WHERE CARKOD = '{cariKodu}'";
             SqlCommand komut = new SqlCommand(komutstr);
             SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
             tablo = asi.Komut_Adaptor(komut);
