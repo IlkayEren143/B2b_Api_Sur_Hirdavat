@@ -1,0 +1,25 @@
+﻿using B2b_Api.Models;
+using B2b_Api.Servisler;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+
+namespace B2b_Api.Controllers
+{
+    public class SiparisController : ApiController
+    {
+        [HttpGet]
+        [Route("SiparisKaydet/{teklifid}")]
+        public Sonuc GetSiparisKaydet(int teklifid)
+        {
+            Sonuc sonuc = new Sonuc();
+            SiparisIslemleri si = new SiparisIslemleri();
+            sonuc = si.SiparisKaydet(teklifid);
+            sonuc.servisUlasmaBasari = true;
+            return sonuc;
+        }
+    }
+}

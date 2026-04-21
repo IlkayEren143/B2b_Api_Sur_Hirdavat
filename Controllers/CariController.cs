@@ -19,6 +19,7 @@ namespace B2b_Api.Controllers
             CariIslemler ci = new CariIslemler();
             SayfalamaBilgileri parametre = new SayfalamaBilgileri();
             sonuc = ci.CariKartlariOku(parametre);
+            sonuc.servisUlasmaBasari = true;
             return sonuc;
         }
         [HttpPost]
@@ -28,6 +29,7 @@ namespace B2b_Api.Controllers
             Sonuc sonuc = new Sonuc();
             CariIslemler ci = new CariIslemler();
             sonuc = ci.CariKartlariOku(sb);
+            sonuc.servisUlasmaBasari = true;
             return sonuc;
         }
         [HttpGet]
@@ -39,6 +41,17 @@ namespace B2b_Api.Controllers
             SayfalamaBilgileri parametre = new SayfalamaBilgileri();
             parametre.ekSorgu = $"WHERE CARKOD = '{cariKodu}'";
             sonuc = ci.CariKartlariOku(parametre);
+            sonuc.servisUlasmaBasari = true;
+            return sonuc;
+        }
+        [HttpGet]
+        [Route("Login/{kod}/{sifre}")]//kod şifre prosedurden düzenleniyor 
+        public Sonuc GetLogin(string kod, string sifre)
+        {
+            Sonuc sonuc = new Sonuc();
+            CariIslemler ci = new CariIslemler();
+            sonuc = ci.SifreKontrol(kod, sifre);
+            sonuc.servisUlasmaBasari = true;
             return sonuc;
         }
     }

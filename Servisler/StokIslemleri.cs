@@ -20,6 +20,16 @@ namespace B2b_Api.Servisler
             sonuc.ekData = sayac;
             return sonuc;
         }
+        public decimal DovizKurunuOku(string dovizKodu, string dovizTuru, DateTime tarih)
+        {
+            string eksorgu = $"WHERE DOVHARKOD = '{dovizKodu}' AND DOVHARTUR = '{dovizTuru}' AND DOVHARTAR = '{tarih.ToString("yyyyMMdd")}'";
+            DataTable tablo = DovizKuruAl(eksorgu);
+            if (tablo == null)
+                return -1;
+            if (tablo.Rows.Count == 0)
+                return 0;
+            return Convert.ToDecimal(tablo.Rows[0][0]);
+        }
         public List<StokKartBilgileri> StokKartlariniListeOku(SayfalamaBilgileri sb)
         {
             List<StokKartBilgileri> skbListe = new List<StokKartBilgileri>();
@@ -747,6 +757,18 @@ namespace B2b_Api.Servisler
                 default:
                     return "application/octet-stream";
             }
+        }
+        private DataTable DovizKuruAl(string ekSorgu = "")
+        {
+           
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            string masterVeriTabani = ConfigurationManager.AppSettings["MasterDBName"].ToString();
+            string komutstr = $"SELECT DOVHARTUT FROM {masterVeriTabani}..DOVHAR";
+            komutstr += " " + ekSorgu;
+            SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+            DataTable tablo = asi.Sorgu_Adaptor(komutstr);
+            return tablo;
         }
     }
 }

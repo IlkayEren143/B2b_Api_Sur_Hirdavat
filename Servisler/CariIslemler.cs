@@ -53,7 +53,7 @@ namespace B2b_Api.Servisler
             string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
             SqlConnection baglanti = new SqlConnection(baglantistr);
             string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
-            string komutstr = $@"SELECT CARVERDAIRE, CARVERHESNO, ISNULL(ADRADRES1, '') AS ADRADRES1, ISNULL(ADRADRES2, '') AS ADRADRES2, ISNULL(ADRADRES3, '') AS ADRADRES3, ISNULL(ADREMAIL1, '') AS ADREMAIL1, ISNULL(ADREMAIL2, '') AS ADREMAIL2, ISNULL(ADRIL, '') AS ADRIL, ISNULL(ADRILCE, '') AS ADRILCE, ISNULL(ADRULKE, '') AS ADRULKE FROM {etaVeriTabani}..CARKART LEFT JOIN(SELECT ADRADRES1, ADRADRES2, ADRADRES3, ADREMAIL1, ADREMAIL2, ADRIL, ADRILCE, ADRULKE, ADRKOD1 FROM  {etaVeriTabani}..ADRESLER) ADRESLER ON ADRESLER.ADRKOD1 = CARKOD WHERE CARKOD = '{cariKodu}'";
+            string komutstr = $@"SELECT CARVERDAIRE, CARVERHESNO, ISNULL(ADRADRES1, '') AS ADRADRES1, ISNULL(ADRADRES2, '') AS ADRADRES2, ISNULL(ADRADRES3, '') AS ADRADRES3, ISNULL(ADREMAIL1, '') AS ADREMAIL1, ISNULL(ADREMAIL2, '') AS ADREMAIL2, ISNULL(ADRIL, '') AS ADRIL, ISNULL(ADRILCE, '') AS ADRILCE, ISNULL(ADRULKE, '') AS ADRULKE, ADRTEL1, ISNULL(KIMMERNISNO, '') AS KOIMMERNISNO FROM {etaVeriTabani}..CARKART LEFT JOIN(SELECT ADRADRES1, ADRADRES2, ADRADRES3, ADREMAIL1, ADREMAIL2, ADRIL, ADRILCE, ADRULKE, ADRKOD1 FROM  {etaVeriTabani}..ADRESLER) ADRESLER ON ADRESLER.ADRKOD1 = CARKOD LEFT JOIN (select KIMKOD, KIMMERNISNO from {etaVeriTabani}..KIMLIKLER) KIMLIKLER ON KIMLIKLER.KIMKOD = CARKOD WHERE CARKOD = '{cariKodu}'";
             SqlCommand komut = new SqlCommand(komutstr);
             SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
             tablo = asi.Komut_Adaptor(komut);
@@ -325,10 +325,23 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
             for (int i = 0; i < tabloCari.Rows.Count; ++i)
             {
                 CariKartBilgileri ckb = new CariKartBilgileri();
-                ckb.bakiye = Convert.ToDecimal(tabloCari.Rows[i]["CARBAKIYE"]);
-                ckb.cariKodu = tabloCari.Rows[i]["CARKOD"].ToString();
-                ckb.cariUnvani = tabloCari.Rows[i]["CARUNVAN"].ToString();
-                ckb.iskonto = Convert.ToDecimal(tabloCari.Rows[i]["CARISKYUZ"]);
+                ckb.bakiye = Convert.ToDecimal(tabloCari.Rows[i]["Bakiye"]);
+                ckb.cariKodu = tabloCari.Rows[i]["Cari Kodu"].ToString();
+                ckb.cariUnvani = tabloCari.Rows[i]["Cari Ünvanı"].ToString();
+                ckb.iskonto = Convert.ToDecimal(tabloCari.Rows[i]["İskonto"]);
+                ckb.vergiDairesi = tabloCari.Rows[i]["Vergi Dairesi"].ToString();
+                ckb.vergiNumarasi = tabloCari.Rows[i]["Vergi Numarası"].ToString();
+                ckb.kimlikNo = tabloCari.Rows[i]["Kimlik Numarası"].ToString();
+                ckb.yetkili = tabloCari.Rows[i]["Yetkili"].ToString();
+                ckb.adres1= tabloCari.Rows[i]["Adres1"].ToString();
+                ckb.adres2= tabloCari.Rows[i]["Adres2"].ToString();
+                ckb.adres3= tabloCari.Rows[i]["Adres3"].ToString();
+                ckb.il= tabloCari.Rows[i]["İl"].ToString();
+                ckb.ilce= tabloCari.Rows[i]["İlçe"].ToString();
+                ckb.ulke= tabloCari.Rows[i]["Ülke"].ToString();
+                ckb.telefon = tabloCari.Rows[i]["Telefon"].ToString();
+                ckb.email = tabloCari.Rows[i]["Email"].ToString();
+                
                 ckbListe.Add(ckb);
             }
             sonuc.sonuc = true;
@@ -461,6 +474,69 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
             }
             return tablo;
         }
-        
+        public Sonuc SifreKontrol(string kod, string sifre)
+        {
+            Sonuc sonuc = new Sonuc();
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+            SqlCommand komut = new SqlCommand();
+            komut.CommandType = System.Data.CommandType.StoredProcedure;
+            komut.CommandText = "SifreKontrol";
+            komut.Parameters.AddWithValue("@veriTabaniAdi", etaVeriTabani);
+            komut.Parameters.AddWithValue("@kod", kod);
+            komut.Parameters.AddWithValue("@sifre", sifre);
+            SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+            DataTable tabloCari = asi.Komut_Adaptor(komut);
+            if (tabloCari == null)
+            {
+                sonuc.sonuc = false;
+                sonuc.veriOkuBasari = false;
+                sonuc.data = null;
+                sonuc.ekData = 0;
+                sonuc.mesaj = asi.hataMesaji;
+               
+                return sonuc;
+            }
+            if (tabloCari.Rows.Count == 0)
+            {
+                sonuc.sonuc = false;
+                sonuc.veriOkuBasari = true;
+                sonuc.data = new List<CariKartBilgileri>();
+                sonuc.ekData = 0;
+                sonuc.mesaj = asi.hataMesaji;
+
+                return sonuc;
+            }
+            List<CariKartBilgileri> ckbListe = new List<CariKartBilgileri>();
+            for (int i = 0; i < tabloCari.Rows.Count; ++i)
+            {
+                CariKartBilgileri ckb = new CariKartBilgileri();
+                ckb.bakiye = Convert.ToDecimal(tabloCari.Rows[i]["Bakiye"]);
+                ckb.cariKodu = tabloCari.Rows[i]["Cari Kodu"].ToString();
+                ckb.cariUnvani = tabloCari.Rows[i]["Cari Ünvanı"].ToString();
+                ckb.iskonto = Convert.ToDecimal(tabloCari.Rows[i]["İskonto"]);
+                ckb.vergiDairesi = tabloCari.Rows[i]["Vergi Dairesi"].ToString();
+                ckb.vergiNumarasi = tabloCari.Rows[i]["Vergi Numarası"].ToString();
+                ckb.kimlikNo = tabloCari.Rows[i]["Kimlik Numarası"].ToString();
+                ckb.yetkili = tabloCari.Rows[i]["Yetkili"].ToString();
+                ckb.adres1 = tabloCari.Rows[i]["Adres1"].ToString();
+                ckb.adres2 = tabloCari.Rows[i]["Adres2"].ToString();
+                ckb.adres3 = tabloCari.Rows[i]["Adres3"].ToString();
+                ckb.il = tabloCari.Rows[i]["İl"].ToString();
+                ckb.ilce = tabloCari.Rows[i]["İlçe"].ToString();
+                ckb.ulke = tabloCari.Rows[i]["Ülke"].ToString();
+                ckb.telefon = tabloCari.Rows[i]["Telefon"].ToString();
+                ckb.email = tabloCari.Rows[i]["Email"].ToString();
+
+                ckbListe.Add(ckb);
+            }
+            sonuc.sonuc = true;
+            sonuc.veriOkuBasari = true;
+            sonuc.data = ckbListe;
+            sonuc.mesaj = "Başarılı";
+            return sonuc;
+        }
+
     }
 }

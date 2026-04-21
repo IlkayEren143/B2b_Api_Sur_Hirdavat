@@ -42,7 +42,9 @@ namespace B2b_Api.Models
         public string ulke { get; set; }
         public string vergidairesi { get; set; }
         public string verginumarasi { get; set; }
-
+        public object kimlikno { get; internal set; }
+        public object email { get; internal set; }
+        public object telefonno { get; internal set; }
 
         public TeklifFisBilgileri()
         {

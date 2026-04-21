@@ -37,7 +37,7 @@ namespace B2b_Api.Servisler
         {
             try
             {
-                string komutstr = @"SELECT id, FisTipi, KDVFlag, ETAKayitDurum, Tarih, ETAKayitTarih, MalToplam, IskontoYuzde1, IskontoYuzde2, IskontoToplam, AraToplam, KDVToplam, GenelToplam, Kur, TeklifNo, CariKodu, CariUnvani, Yetkili, Adres1, Adres2, DovizKodu, DovizTuru, ETASirketAdi, Aciklama1, Aciklama2, Aciklama3, OzelKod1, OzelKod2, OzelKod3, Adres3, Ilce, Il, Ulke, VergiDairesi, VergiNumarasi From TeklifFis";
+                string komutstr = @"SELECT id, FisTipi, KDVFlag, ETAKayitDurum, Tarih, ETAKayitTarih, MalToplam, IskontoYuzde1, IskontoYuzde2, IskontoToplam, AraToplam, KDVToplam, GenelToplam, Kur, TeklifNo, CariKodu, CariUnvani, Yetkili, Adres1, Adres2, DovizKodu, DovizTuru, ETASirketAdi, Aciklama1, Aciklama2, Aciklama3, OzelKod1, OzelKod2, OzelKod3, Adres3, Ilce, Il, Ulke, VergiDairesi, VergiNumarasi, KimlikNo, EMail, TelefonNo From TeklifFis";
                 komutstr += " " + eksorgu;
                 DataTable tablo = new DataTable();
                 Ana_SQL_Islemleri asi = new Ana_SQL_Islemleri(tfi_baglanti, tfi_transaction, tfi_komutCalismaSuresi);
@@ -118,7 +118,7 @@ namespace B2b_Api.Servisler
         {
             try
             {
-                string komutstr = @"INSERT INTO TeklifFis(FisTipi, KDVFlag, ETAKayitDurum, Tarih, ETAKayitTarih, MalToplam, IskontoYuzde1, IskontoYuzde2, IskontoToplam, AraToplam, KDVToplam, GenelToplam, Kur, TeklifNo, CariKodu, CariUnvani, Yetkili, Adres1, Adres2, DovizKodu, DovizTuru, ETASirketAdi, Aciklama1, Aciklama2, Aciklama3, OzelKod1, OzelKod2, OzelKod3, Adres3, Ilce, Il, Ulke, VergiDairesi, VergiNumarasi) values (@FisTipi, @KDVFlag, @ETAKayitDurum, @Tarih, @ETAKayitTarih, @MalToplam, @IskontoYuzde1, @IskontoYuzde2, @IskontoToplam, @AraToplam, @KDVToplam, @GenelToplam, @Kur, @TeklifNo, @CariKodu, @CariUnvani, @Yetkili, @Adres1, @Adres2, @DovizKodu, @DovizTuru, @ETASirketAdi, @Aciklama1, @Aciklama2, @Aciklama3, @OzelKod1, @OzelKod2, @OzelKod3, @Adres3, @Ilce, @Il, @Ulke, @VergiDairesi, @VergiNumarasi)";
+                string komutstr = @"INSERT INTO TeklifFis(FisTipi, KDVFlag, ETAKayitDurum, Tarih, ETAKayitTarih, MalToplam, IskontoYuzde1, IskontoYuzde2, IskontoToplam, AraToplam, KDVToplam, GenelToplam, Kur, TeklifNo, CariKodu, CariUnvani, Yetkili, Adres1, Adres2, DovizKodu, DovizTuru, ETASirketAdi, Aciklama1, Aciklama2, Aciklama3, OzelKod1, OzelKod2, OzelKod3, Adres3, Ilce, Il, Ulke, VergiDairesi, VergiNumarasi, KimlikNo, EMail, TelefonNo) values (@FisTipi, @KDVFlag, @ETAKayitDurum, @Tarih, @ETAKayitTarih, @MalToplam, @IskontoYuzde1, @IskontoYuzde2, @IskontoToplam, @AraToplam, @KDVToplam, @GenelToplam, @Kur, @TeklifNo, @CariKodu, @CariUnvani, @Yetkili, @Adres1, @Adres2, @DovizKodu, @DovizTuru, @ETASirketAdi, @Aciklama1, @Aciklama2, @Aciklama3, @OzelKod1, @OzelKod2, @OzelKod3, @Adres3, @Ilce, @Il, @Ulke, @VergiDairesi, @VergiNumarasi, @KimlikNo, @EMail, @TelefonNo)";
                 SqlCommand komut = new SqlCommand(komutstr);
                 komut.Parameters.AddWithValue("@FisTipi", tfb.fistipi);
                 komut.Parameters.AddWithValue("@KDVFlag", tfb.kdvflag);
@@ -154,6 +154,9 @@ namespace B2b_Api.Servisler
                 komut.Parameters.AddWithValue("@Ulke", tfb.ulke);
                 komut.Parameters.AddWithValue("@VergiDairesi", tfb.vergidairesi);
                 komut.Parameters.AddWithValue("@VergiNumarasi", tfb.verginumarasi);
+                komut.Parameters.AddWithValue("@KimlikNo", tfb.kimlikno);
+                komut.Parameters.AddWithValue("@EMail", tfb.email);
+                komut.Parameters.AddWithValue("@TelefonNo", tfb.telefonno);
                 Ana_SQL_Islemleri asi = new Ana_SQL_Islemleri(tfi_baglanti, tfi_transaction, tfi_komutCalismaSuresi);
                 bool sonuc = false;
                 if (tfi_transaction == null)
@@ -238,7 +241,7 @@ namespace B2b_Api.Servisler
         {
             try
             {
-                string komutstr = @"UPDATE TeklifFis SET FisTipi = @FisTipi, KDVFlag = @KDVFlag, ETAKayitDurum = @ETAKayitDurum, Tarih = @Tarih, ETAKayitTarih = @ETAKayitTarih, MalToplam = @MalToplam, IskontoYuzde1 = @IskontoYuzde1, IskontoYuzde2 = @IskontoYuzde2, IskontoToplam = @IskontoToplam, AraToplam = @AraToplam, KDVToplam = @KDVToplam, GenelToplam = @GenelToplam, Kur = @Kur, TeklifNo = @TeklifNo, CariKodu = @CariKodu, CariUnvani = @CariUnvani, Yetkili = @Yetkili, Adres1 = @Adres1, Adres2 = @Adres2, DovizKodu = @DovizKodu, DovizTuru = @DovizTuru, ETASirketAdi = @ETASirketAdi, Aciklama1 = @Aciklama1, Aciklama2 = @Aciklama2, Aciklama3 = @Aciklama3, OzelKod1 = @OzelKod1, OzelKod2 = @OzelKod2, OzelKod3 = @OzelKod3, Adres3 = @Adres3, Ilce = @Ilce, Il = @Il, Ulke = @Ulke, VergiDairesi = @VergiDairesi, VergiNumarasi = @VergiNumarasi";
+                string komutstr = @"UPDATE TeklifFis SET FisTipi = @FisTipi, KDVFlag = @KDVFlag, ETAKayitDurum = @ETAKayitDurum, Tarih = @Tarih, ETAKayitTarih = @ETAKayitTarih, MalToplam = @MalToplam, IskontoYuzde1 = @IskontoYuzde1, IskontoYuzde2 = @IskontoYuzde2, IskontoToplam = @IskontoToplam, AraToplam = @AraToplam, KDVToplam = @KDVToplam, GenelToplam = @GenelToplam, Kur = @Kur, TeklifNo = @TeklifNo, CariKodu = @CariKodu, CariUnvani = @CariUnvani, Yetkili = @Yetkili, Adres1 = @Adres1, Adres2 = @Adres2, DovizKodu = @DovizKodu, DovizTuru = @DovizTuru, ETASirketAdi = @ETASirketAdi, Aciklama1 = @Aciklama1, Aciklama2 = @Aciklama2, Aciklama3 = @Aciklama3, OzelKod1 = @OzelKod1, OzelKod2 = @OzelKod2, OzelKod3 = @OzelKod3, Adres3 = @Adres3, Ilce = @Ilce, Il = @Il, Ulke = @Ulke, VergiDairesi = @VergiDairesi, VergiNumarasi = @VergiNumarasi, KimlikNo = @KimlikNo, EMail = @EMail, TelefonNo = @TelefonNo";
                 komutstr += " " + eksorgu;
                 SqlCommand komut = new SqlCommand(komutstr);
                 komut.Parameters.AddWithValue("@FisTipi", tfb.fistipi);
@@ -275,12 +278,38 @@ namespace B2b_Api.Servisler
                 komut.Parameters.AddWithValue("@Ulke", tfb.ulke);
                 komut.Parameters.AddWithValue("@VergiDairesi", tfb.vergidairesi);
                 komut.Parameters.AddWithValue("@VergiNumarasi", tfb.verginumarasi);
+                komut.Parameters.AddWithValue("@KimlikNo", tfb.kimlikno);
+                komut.Parameters.AddWithValue("@EMail", tfb.email);
+                komut.Parameters.AddWithValue("@TelefonNo", tfb.telefonno);
                 Ana_SQL_Islemleri asi = new Ana_SQL_Islemleri(tfi_baglanti, tfi_transaction, tfi_komutCalismaSuresi);
                 bool sonuc = false;
                 if (tfi_transaction == null)
                 { sonuc = asi.Komut_ExecuteNonQuery(komut, hatagoster, "TeklifFisIslemleri : TeklifFisDuzenle"); hataMesaji = asi.hataMesaji; }
                 else
                 { sonuc = asi.Komut_ExecuteNonQuery_Transaction(komut, hatagoster, "TeklifFisIslemleri : TeklifFisDuzenle"); hataMesaji = asi.hataMesaji; }
+                return sonuc;
+            }
+            catch (Exception ex)
+            {
+                hataMesaji = ex.Message;
+                return false;
+            }
+        }
+        public bool TeklifFisFisTipiGuncelle(string eksorgu = "", bool hatagoster = false)
+        {
+            try
+            {
+                string komutstr = @"UPDATE TeklifFis SET FisTipi = @FisTipi";
+                komutstr += " " + eksorgu;
+                SqlCommand komut = new SqlCommand(komutstr);
+                komut.Parameters.AddWithValue("@FisTipi", tfb.fistipi);
+               
+                Ana_SQL_Islemleri asi = new Ana_SQL_Islemleri(tfi_baglanti, tfi_transaction, tfi_komutCalismaSuresi);
+                bool sonuc = false;
+                if (tfi_transaction == null)
+                { sonuc = asi.Komut_ExecuteNonQuery(komut, hatagoster, "TeklifFisIslemleri : TeklifFisFisTipiGuncelle"); hataMesaji = asi.hataMesaji; }
+                else
+                { sonuc = asi.Komut_ExecuteNonQuery_Transaction(komut, hatagoster, "TeklifFisIslemleri : TeklifFisFisTipiGuncelle"); hataMesaji = asi.hataMesaji; }
                 return sonuc;
             }
             catch (Exception ex)
@@ -933,6 +962,9 @@ namespace B2b_Api.Servisler
                 tfb.il = satir["ADRIL"].ToString();
                 tfb.ilce = satir["ADRILCE"].ToString();
                 tfb.ulke = satir["ADRULKE"].ToString();
+                tfb.telefonno = satir["ADRTEL1"].ToString();
+                tfb.email = satir["EMAIL1"].ToString();
+                tfb.kimlikno = satir["KIMMERNISNO"].ToString();
                 tfb.vergidairesi = satir["CARVERDAIRE"].ToString();
                 tfb.verginumarasi= satir["CARVERHESNO"].ToString();
             }

@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36616.10 d17.14
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.36602.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "B2b_Api", "B2b_Api.csproj", "{94D58003-E11D-4F6B-B3C4-D5CE75489573}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yardimci ETA Islemleri", "..\ETA_Kayit_Islemleri\Yeni SQL ve ETA DLL'leri ve Test Programı (Decimal)\Yardimci ETA Islemleri\Yardimci ETA Islemleri\Yardimci ETA Islemleri.csproj", "{1B1B5CD3-29C3-4DB0-B7A8-6BAE19FD9CBD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Genel SQL İşlemleri", "..\ETA_Kayit_Islemleri\Yeni SQL ve ETA DLL'leri ve Test Programı (Decimal)\SQL Kütüphanesi\ETA İslemleri\SQL Islemleri\Genel SQL İşlemleri.csproj", "{16746043-3A4A-4E1A-8FFF-F8C192AABF0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETAKayitIslemleri", "..\ETA-Connector İşlemleri\ETAKayitIslemleri.csproj", "{5A087CB2-B90E-4565-A373-07DF1302B216}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{16746043-3A4A-4E1A-8FFF-F8C192AABF0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{16746043-3A4A-4E1A-8FFF-F8C192AABF0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16746043-3A4A-4E1A-8FFF-F8C192AABF0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A087CB2-B90E-4565-A373-07DF1302B216}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A087CB2-B90E-4565-A373-07DF1302B216}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A087CB2-B90E-4565-A373-07DF1302B216}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A087CB2-B90E-4565-A373-07DF1302B216}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
