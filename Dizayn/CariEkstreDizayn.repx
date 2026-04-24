@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XtraReportsLayoutSerializer SerializerVersion="18.2.16.0" Ref="1" ControlType="DevExpress.XtraReports.UI.XtraReport, DevExpress.XtraReports.v18.2, Version=18.2.16.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" Name="CariEkstreDizayn" SnapGridSize="25" ReportUnit="TenthsOfAMillimeter" Margins="76, 69, 254, 256" PageWidth="2159" PageHeight="2794" Version="18.2" DataMember="CariEkstre" DataSource="#Ref-0" Dpi="254">
+  <Bands>
+    <Item1 Ref="2" ControlType="TopMarginBand" Name="TopMargin" HeightF="254" Dpi="254">
+      <Controls>
+        <Item1 Ref="3" ControlType="XRLabel" Name="label2" Multiline="true" Text="label2" SizeF="254,58.42" LocationFloat="0, 81.91498" Dpi="254" Padding="5,5,0,0,254">
+          <ExpressionBindings>
+            <Item1 Ref="4" Expression="[Cari Kodu]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item1>
+      </Controls>
+    </Item1>
+    <Item2 Ref="5" ControlType="DetailBand" Name="Detail" HeightF="58.42" Dpi="254">
+      <Controls>
+        <Item1 Ref="6" ControlType="XRLabel" Name="label8" Multiline="true" Text="label8" SizeF="145.520813,58.42" LocationFloat="362.479218, 0" Dpi="254" Padding="5,5,0,0,254">
+          <ExpressionBindings>
+            <Item1 Ref="7" Expression="[Tip Kodu]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item1>
+        <Item2 Ref="8" ControlType="XRLabel" Name="label7" TextFormatString="{0:n2}" Multiline="true" Text="label7" TextAlignment="TopRight" SizeF="254,58.42" LocationFloat="1760, 0" Dpi="254" Padding="5,5,0,0,254">
+          <ExpressionBindings>
+            <Item1 Ref="9" Expression="[Bakiye]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item2>
+        <Item3 Ref="10" ControlType="XRLabel" Name="label6" TextFormatString="{0:n2}" Multiline="true" Text="label6" TextAlignment="TopRight" SizeF="254,58.42" LocationFloat="1506, 0" Dpi="254" Padding="5,5,0,0,254">
+          <ExpressionBindings>
+            <Item1 Ref="11" Expression="[Alacak]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item3>
+        <Item4 Ref="12" ControlType="XRLabel" Name="label5" TextFormatString="{0:n2}" Multiline="true" Text="label5" TextAlignment="TopRight" SizeF="254,58.42" LocationFloat="1252, 0" Dpi="254" Padding="5,5,0,0,254">
+          <ExpressionBindings>
+            <Item1 Ref="13" Expression="[Borç]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item4>
+        <Item5 Ref="14" ControlType="XRLabel" Name="label4" Multiline="true" Text="label4" SizeF="744,58.42" LocationFloat="508.000031, 0" Dpi="254" Padding="5,5,0,0,254">
+          <ExpressionBindings>
+            <Item1 Ref="15" Expression="[Açıklama]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item5>
+        <Item6 Ref="16" ControlType="XRLabel" Name="label3" Multiline="true" Text="label3" SizeF="177.270874,58.42" LocationFloat="185.208328, 0" Dpi="254" Padding="5,5,0,0,254">
+          <ExpressionBindings>
+            <Item1 Ref="17" Expression="[Evrak No]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item6>
+        <Item7 Ref="18" ControlType="XRLabel" Name="label1" TextFormatString="{0:d}" Multiline="true" Text="label1" SizeF="185.208328,58.42" LocationFloat="0, 0" Dpi="254" Padding="5,5,0,0,254">
+          <ExpressionBindings>
+            <Item1 Ref="19" Expression="[Tarih]" PropertyName="Text" EventName="BeforePrint" />
+          </ExpressionBindings>
+        </Item7>
+      </Controls>
+    </Item2>
+    <Item3 Ref="20" ControlType="BottomMarginBand" Name="BottomMargin" HeightF="256.4341" Dpi="254" />
+  </Bands>
+  <ObjectStorage>
+    <Item1 ObjectType="DevExpress.XtraReports.Serialization.ObjectStorageInfo, DevExpress.XtraReports.v18.2" Ref="0" Content="~Xtra#NULL" Type="System.Data.DataSet" />
+  </ObjectStorage>
+</XtraReportsLayoutSerializer>

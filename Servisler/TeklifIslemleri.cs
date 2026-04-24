@@ -1190,14 +1190,14 @@ namespace B2b_Api.Servisler
             {
                 sonuc.sonuc = false;
                 sonuc.data = null;
-                sonuc.mesaj = "Tahsilat Makbuzu okunamadı";
+                sonuc.mesaj = "Teklif pdf'i okunamadı";
                 return sonuc;
             }
             if (bytes.Length == 0)
             {
                 sonuc.sonuc = false;
                 sonuc.data = null;
-                sonuc.mesaj = "Tahsilat Makbuzu bulunamadı";
+                sonuc.mesaj = "Teklif pdf'i bulunamadı";
                 return sonuc;
             }
             sonuc.sonuc = true;

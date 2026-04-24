@@ -21,5 +21,14 @@ namespace B2b_Api.Controllers
             sonuc.servisUlasmaBasari = true;
             return sonuc;
         }
+        [HttpGet]
+        [Route("BekleyenSiparislerPDFAl/{cariKodu}")]
+        public Sonuc GetBekleyenSiparislerPDFAl(string cariKodu)
+        {
+            Sonuc sonuc = new Sonuc();
+            SiparisIslemleri si = new SiparisIslemleri();
+            sonuc = si.BekleyenSiparislerPDFAl(cariKodu);
+            return sonuc;
+        }
     }
 }

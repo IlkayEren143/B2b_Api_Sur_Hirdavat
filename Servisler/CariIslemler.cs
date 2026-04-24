@@ -1,9 +1,11 @@
 ﻿using B2b_Api.Models;
+using DevExpress.XtraReports.UI;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Web;
 
@@ -536,6 +538,150 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
             sonuc.data = ckbListe;
             sonuc.mesaj = "Başarılı";
             return sonuc;
+        }
+        public Sonuc CariEkstrePDFAl(string basTarih, string bitTarih, string cariKodu)
+        {
+            Sonuc sonuc = new Sonuc();
+            DataSet ds = new DataSet();
+            DataTable tablo = CariEkstreOku(basTarih, bitTarih, cariKodu);
+            if (tablo == null)
+            {
+                sonuc.sonuc = false;
+                sonuc.veriOkuBasari = false;
+                sonuc.data = null;
+                sonuc.ekData = null;
+                sonuc.mesaj = "Cari Hareket tablosu okunamadı.";
+                return sonuc;
+            }
+            if (tablo.Rows.Count == 0)
+            {
+                sonuc.sonuc = false;
+                sonuc.veriOkuBasari = true;
+                sonuc.data = null;
+                sonuc.ekData = null;
+                sonuc.mesaj = "Cariye ait hareket bulunamadı.";
+                return sonuc;
+            }
+            tablo.TableName = "CariEkstre";
+            ds.Tables.Add(tablo);
+            string mappedPath = System.Web.Hosting.HostingEnvironment.MapPath("~/Dizayn");
+            string dizynDosyasi = mappedPath + "\\" + "CariEkstreDizayn" + ".repx";
+            XtraReport rapor = new XtraReport();
+            rapor.LoadLayoutFromXml(dizynDosyasi);
+            rapor.DataSource = ds;
+            rapor.ExportToPdf(Path.GetDirectoryName(dizynDosyasi) + $"//CariEkstre_{cariKodu}.pdf");
+            FileStream file = new FileStream(Path.GetDirectoryName(dizynDosyasi) + $"//CariEkstre_{cariKodu}.pdf", FileMode.Open, FileAccess.Read);
+            byte[] bytes = new byte[file.Length];
+            file.Read(bytes, 0, (int)file.Length);
+            file.Close();
+            string base64String = Convert.ToBase64String(bytes);
+            if (bytes == null)
+            {
+                sonuc.sonuc = false;
+                sonuc.data = null;
+                sonuc.mesaj = "Carei ekstre PDF'i okunamadı";
+                return sonuc;
+            }
+            if (bytes.Length == 0)
+            {
+                sonuc.sonuc = false;
+                sonuc.data = null;
+                sonuc.mesaj = "Cari Ekstre PDF'i bulunamadı";
+                return sonuc;
+            }
+            sonuc.sonuc = true;
+            sonuc.data = base64String;
+            sonuc.ekData = Path.GetDirectoryName(dizynDosyasi) + $"//CariEkstre_{cariKodu}.pdf";
+            sonuc.mesaj = "Başarılı.";
+            return sonuc;
+        }
+        private DataTable CariEkstreOku(string basTarih, string bitTarih, string cariKodu)
+        {
+            DataTable sonuc = new DataTable();
+            int ilkYil = Convert.ToInt32(basTarih.Substring(0, 4));
+            int ilkAy = Convert.ToInt32(basTarih.Substring(4, 2));
+            int ilkGun = Convert.ToInt32(basTarih.Substring(6, 2));
+            DateTime ilkTarih = new DateTime(ilkYil, ilkAy, ilkGun);
+            int sonYil = Convert.ToInt32(bitTarih.Substring(0, 4));
+            int sonAy = Convert.ToInt32(bitTarih.Substring(4, 2));
+            int sonGun = Convert.ToInt32(bitTarih.Substring(6, 2));
+            DateTime sonTarih = new DateTime(sonYil, sonAy, sonGun);
+            sonuc = CariEkstreyiOku(ilkTarih, sonTarih, cariKodu);
+
+            return sonuc;
+        }
+        private DataTable CariEkstreyiOku(DateTime ilkTarih, DateTime sonTarih, string cariKodu)
+        {
+
+            try
+            {
+
+                string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+                SqlConnection baglanti = new SqlConnection(baglantistr);
+                string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+                SqlCommand komut = new SqlCommand();
+                komut.CommandType = System.Data.CommandType.StoredProcedure;
+                komut.CommandText = "CariEkstreOku";
+                komut.Parameters.AddWithValue("@veriTabaniAdi", etaVeriTabani);
+                komut.Parameters.AddWithValue("@sonTarih", sonTarih);
+                komut.Parameters.AddWithValue("@cariKodu", cariKodu);
+                SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+                DataSet ds = asi.KomutDS_Adaptor(komut);
+                DataTable tablo = EkstreTablosunuOlustur(ilkTarih, sonTarih, cariKodu, ds);
+                return tablo;
+
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+
+        }
+        private DataTable EkstreTablosunuOlustur(DateTime ilkTarih, DateTime sonTarih, string cariKodu, DataSet dsHam)
+        {
+            DataTable tablo = dsHam.Tables[0].Copy();
+            tablo.DefaultView.Sort = "Tarih, [Evrak No]";
+            DataTable ekstreTablo = tablo.Clone();
+            DataTable tabloOnce = tablo.Copy();
+            DataTable tabloSonra = tablo.Copy();
+
+            //tabloOnce.DefaultView.RowFilter = string.Format("[Tarih] < '#{0}# '", ilkTarih.ToString("dd/MM/yyyy"));
+            //tabloOnce = tabloOnce.DefaultView.ToTable();
+            //tabloSonra.DefaultView.RowFilter = string.Format("[Tarih] >= '#{0}# '", ilkTarih.ToString("dd/MM/yyyy"));
+            //tabloSonra = tabloSonra.DefaultView.ToTable();
+            tabloOnce = tabloOnce.AsEnumerable().Where(x => x.Field<DateTime>("Tarih") < ilkTarih).CopyToDataTable();
+
+            tabloSonra = tabloSonra.AsEnumerable().Where(x => x.Field<DateTime>("Tarih") >= ilkTarih).CopyToDataTable();
+            DataRow ilkSatir = ekstreTablo.NewRow();
+            ilkSatir["Cari Kodu"] = cariKodu;
+            ilkSatir["Tarih"] = ilkTarih.AddDays(-1);
+            ilkSatir["Tip Kodu"] = "";
+            ilkSatir["Evrak No"] = "";
+            ilkSatir["Açıklama"] = "NAKLİ YEKÜN";
+            ilkSatir["Vade"] = Convert.ToDateTime("01.01.1900");
+
+            decimal toplamBakiye = 0;
+            decimal toplamBorc = 0;
+            decimal toplamAlacak = 0;
+            for (int i = 0; i < tabloOnce.Rows.Count; ++i)
+            {
+                toplamBorc += Convert.ToDecimal(tabloOnce.Rows[i]["Borç"]);
+                toplamAlacak += Convert.ToDecimal(tabloOnce.Rows[i]["Alacak"]);
+                // toplamBakiye += Convert.ToDecimal(tabloOnce.Rows[i]["Borç"]) - Convert.ToDecimal(tabloOnce.Rows[i]["Alacak"]);
+            }
+            toplamBakiye = toplamBorc - toplamAlacak;
+            ilkSatir["Borç"] = toplamBorc;
+            ilkSatir["Alacak"] = toplamAlacak;
+            ilkSatir["Bakiye"] = toplamBakiye;
+            ekstreTablo.Rows.Add(ilkSatir);
+            for (int i = 0; i < tabloSonra.Rows.Count; ++i)
+            {
+                toplamBakiye += Convert.ToDecimal(tabloSonra.Rows[i]["Borç"]) - Convert.ToDecimal(tabloSonra.Rows[i]["Alacak"]);
+                tabloSonra.Rows[i]["Bakiye"] = toplamBakiye;
+                ekstreTablo.ImportRow(tabloSonra.Rows[i]);
+            }
+
+            return ekstreTablo;
         }
 
     }

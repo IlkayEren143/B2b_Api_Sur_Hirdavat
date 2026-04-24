@@ -1,11 +1,15 @@
 ﻿using B2b_Api.Models;
+using DevExpress.XtraReports.UI;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Web;
+using DevExpress.XtraPrinting;
+using System.Drawing.Printing;
 
 namespace B2b_Api.Servisler
 {
@@ -140,7 +144,84 @@ namespace B2b_Api.Servisler
             }
             return sonuc;
         }
+        public Sonuc BekleyenSiparislerPDFAl(string cariKodu)
+        {
+            Sonuc sonuc = new Sonuc();
+            DataSet ds = new DataSet();
+            DataTable tablo = BekleyenSiparisleriOku(cariKodu);
+            if (tablo == null)
+            {
+                sonuc.sonuc = false;
+                sonuc.veriOkuBasari = false;
+                sonuc.data = null;
+                sonuc.ekData = null;
+                sonuc.mesaj = "Sipariş hareket tablosu okunamadı.";
+                return sonuc;
+            }
+            if (tablo.Rows.Count == 0)
+            {
+                sonuc.sonuc = false;
+                sonuc.veriOkuBasari = true;
+                sonuc.data = null;
+                sonuc.ekData = null;
+                sonuc.mesaj = "Cariye ait Sipariş hareket bulunamadı.";
+                return sonuc;
+            }
+            tablo.TableName = "BekleyenSiparisler";
+            ds.Tables.Add(tablo);
+            string mappedPath = System.Web.Hosting.HostingEnvironment.MapPath("~/Dizayn");
+            string dizynDosyasi = mappedPath + "\\" + "BekleyenSiparislerDizayn" + ".repx";
+            XtraReport rapor = new XtraReport();
+            rapor.LoadLayoutFromXml(dizynDosyasi);
+            rapor.DataSource = ds;
+            if (File.Exists(Path.GetDirectoryName(dizynDosyasi) + $"//BekleyenSiparis_{cariKodu}.pdf"))
+                File.Delete(Path.GetDirectoryName(dizynDosyasi) + $"//BekleyenSiparis_{cariKodu}.pdf");
+            rapor.ExportToPdf(Path.GetDirectoryName(dizynDosyasi) + $"//BekleyenSiparis_{cariKodu}.pdf");
+            FileStream file = new FileStream(Path.GetDirectoryName(dizynDosyasi) + $"//BekleyenSiparis_{cariKodu}.pdf", FileMode.Open, FileAccess.Read);
+            byte[] bytes = new byte[file.Length];
+            file.Read(bytes, 0, (int)file.Length);
+            file.Close();
+            string base64String = Convert.ToBase64String(bytes);
+            if (bytes == null)
+            {
+                sonuc.sonuc = false;
+                sonuc.data = null;
+                sonuc.mesaj = "Bekleyen sipariş PDF'i okunamadı";
+                return sonuc;
+            }
+            if (bytes.Length == 0)
+            {
+                sonuc.sonuc = false;
+                sonuc.data = null;
+                sonuc.mesaj = "Cariye ait bekleyen sipariş PDF'i bulunamadı";
+                return sonuc;
+            }
+            sonuc.sonuc = true;
+            sonuc.data = base64String;
+            sonuc.ekData = Path.GetDirectoryName(dizynDosyasi) + $"//BekleyenSiparis_{cariKodu}.pdf";
+            sonuc.mesaj = "Başarılı.";
+            return sonuc;
+        }
 
+        private DataTable BekleyenSiparisleriOku(string cariKodu)
+        {
+
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+            string etaMaster = ConfigurationManager.AppSettings["MasterDBName"].ToString();
+
+            string eksorgu = $@" WHERE SIPHARTIPI IN (SELECT SIPGENFTNO FROM {etaMaster}..SIPGENFISTIP WHERE SIPGENFTTIP = 2 AND SIPGENFTACKAPA = 1) AND SIPHARTESFLAG = 0 AND SIPHARCARKOD = '{cariKodu}'";
+            SqlCommand komut = new SqlCommand();
+            komut.CommandType = System.Data.CommandType.StoredProcedure;
+            komut.CommandText = "SiparisHareketOku";
+            komut.Parameters.AddWithValue("@veriTabaniAdi", etaVeriTabani);
+            komut.Parameters.AddWithValue("@eksorgu", eksorgu);
+
+            SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+            DataTable tablo = asi.Komut_Adaptor(komut);
+            return tablo;
+        }
         private int ETAKaydet(DataRow fis, DataTable hareket, ref string hata)
         {
             hata = "Başarılı";
@@ -252,6 +333,7 @@ namespace B2b_Api.Servisler
             }
             return refno;
         }
+
         private ETA_Kayit_Islemleri.EvrakBaglantiParametreleri EvrakParametreleriniOlustur()
         {
             try
