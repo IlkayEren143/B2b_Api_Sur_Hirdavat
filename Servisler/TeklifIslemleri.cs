@@ -963,7 +963,7 @@ namespace B2b_Api.Servisler
                 tfb.ilce = satir["ADRILCE"].ToString();
                 tfb.ulke = satir["ADRULKE"].ToString();
                 tfb.telefonno = satir["ADRTEL1"].ToString();
-                tfb.email = satir["EMAIL1"].ToString();
+                tfb.email = satir["ADREMAIL1"].ToString();
                 tfb.kimlikno = satir["KIMMERNISNO"].ToString();
                 tfb.vergidairesi = satir["CARVERDAIRE"].ToString();
                 tfb.verginumarasi= satir["CARVERHESNO"].ToString();
@@ -1229,6 +1229,8 @@ namespace B2b_Api.Servisler
             evrak.mailSifre = ConfigurationManager.AppSettings["sifre"].ToString();
             evrak.ssl = Convert.ToBoolean(ConfigurationManager.AppSettings["ssl"].ToString());
             evrak.portNo = Convert.ToInt32(ConfigurationManager.AppSettings["portNo"]);
+            evrak.ekMail1 = string.IsNullOrEmpty(ConfigurationManager.AppSettings["bilgilendirmeMaili1"].ToString()) ? "" : ConfigurationManager.AppSettings["bilgilendirmeMaili1"].ToString();
+            evrak.ekMail2 = string.IsNullOrEmpty(ConfigurationManager.AppSettings["bilgilendirmeMaili2"].ToString()) ? "" : ConfigurationManager.AppSettings["bilgilendirmeMaili2"].ToString();
             int sayac = 0;
             Sonuc sonuc = new Sonuc();
             try

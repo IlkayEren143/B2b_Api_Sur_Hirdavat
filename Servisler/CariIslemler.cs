@@ -13,6 +13,7 @@ namespace B2b_Api.Servisler
 {
     public class CariIslemler
     {
+
         public Sonuc CariKartlariOku(SayfalamaBilgileri sb)
         {
             Sonuc sonuc = new Sonuc();
@@ -55,7 +56,7 @@ namespace B2b_Api.Servisler
             string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
             SqlConnection baglanti = new SqlConnection(baglantistr);
             string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
-            string komutstr = $@"SELECT CARVERDAIRE, CARVERHESNO, ISNULL(ADRADRES1, '') AS ADRADRES1, ISNULL(ADRADRES2, '') AS ADRADRES2, ISNULL(ADRADRES3, '') AS ADRADRES3, ISNULL(ADREMAIL1, '') AS ADREMAIL1, ISNULL(ADREMAIL2, '') AS ADREMAIL2, ISNULL(ADRIL, '') AS ADRIL, ISNULL(ADRILCE, '') AS ADRILCE, ISNULL(ADRULKE, '') AS ADRULKE, ADRTEL1, ISNULL(KIMMERNISNO, '') AS KOIMMERNISNO FROM {etaVeriTabani}..CARKART LEFT JOIN(SELECT ADRADRES1, ADRADRES2, ADRADRES3, ADREMAIL1, ADREMAIL2, ADRIL, ADRILCE, ADRULKE, ADRKOD1 FROM  {etaVeriTabani}..ADRESLER) ADRESLER ON ADRESLER.ADRKOD1 = CARKOD LEFT JOIN (select KIMKOD, KIMMERNISNO from {etaVeriTabani}..KIMLIKLER) KIMLIKLER ON KIMLIKLER.KIMKOD = CARKOD WHERE CARKOD = '{cariKodu}'";
+            string komutstr = $@"SELECT CARVERDAIRE, CARVERHESNO, ISNULL(ADRADRES1, '') AS ADRADRES1, ISNULL(ADRADRES2, '') AS ADRADRES2, ISNULL(ADRADRES3, '') AS ADRADRES3, ISNULL(ADREMAIL1, '') AS ADREMAIL1, ISNULL(ADREMAIL2, '') AS ADREMAIL2, ISNULL(ADRIL, '') AS ADRIL, ISNULL(ADRILCE, '') AS ADRILCE, ISNULL(ADRULKE, '') AS ADRULKE, ADRTEL1, ISNULL(KIMMERNISNO, '') AS KIMMERNISNO FROM {etaVeriTabani}..CARKART LEFT JOIN(SELECT ADRADRES1, ADRADRES2, ADRADRES3, ADREMAIL1, ADREMAIL2, ADRIL, ADRILCE, ADRULKE, ADRKOD1, ADRTEL1 FROM  {etaVeriTabani}..ADRESLER) ADRESLER ON ADRESLER.ADRKOD1 = CARKOD LEFT JOIN (select KIMKOD, KIMMERNISNO from {etaVeriTabani}..KIMLIKLER) KIMLIKLER ON KIMLIKLER.KIMKOD = CARKOD WHERE CARKOD = '{cariKodu}'";
             SqlCommand komut = new SqlCommand(komutstr);
             SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
             tablo = asi.Komut_Adaptor(komut);
@@ -649,9 +650,14 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
             //tabloOnce = tabloOnce.DefaultView.ToTable();
             //tabloSonra.DefaultView.RowFilter = string.Format("[Tarih] >= '#{0}# '", ilkTarih.ToString("dd/MM/yyyy"));
             //tabloSonra = tabloSonra.DefaultView.ToTable();
-            tabloOnce = tabloOnce.AsEnumerable().Where(x => x.Field<DateTime>("Tarih") < ilkTarih).CopyToDataTable();
+            var onceQuery = tabloOnce.AsEnumerable().Where(x => x.Field<DateTime>("Tarih") < ilkTarih);
 
-            tabloSonra = tabloSonra.AsEnumerable().Where(x => x.Field<DateTime>("Tarih") >= ilkTarih).CopyToDataTable();
+            tabloOnce = onceQuery.Any() ? onceQuery.CopyToDataTable() : tabloOnce.Clone();
+
+
+            var sonraQuery = tabloSonra.AsEnumerable().Where(x => x.Field<DateTime>("Tarih") >= ilkTarih);
+
+            tabloSonra = sonraQuery.Any() ? sonraQuery.CopyToDataTable() : tabloSonra.Clone();
             DataRow ilkSatir = ekstreTablo.NewRow();
             ilkSatir["Cari Kodu"] = cariKodu;
             ilkSatir["Tarih"] = ilkTarih.AddDays(-1);

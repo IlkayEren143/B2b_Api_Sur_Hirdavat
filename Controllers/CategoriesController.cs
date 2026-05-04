@@ -1,9 +1,11 @@
-﻿using System.Web.Http;
-using B2b_Api.Models;
+﻿using B2b_Api.Models;
 using B2b_Api.Servisler;
+using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace B2b_Api.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class CategoriesController : ApiController
     {
         private readonly CategoryService _service = new CategoryService();
