@@ -57,6 +57,19 @@ namespace B2b_Api.Controllers
             sonuc.servisUlasmaBasari = true;
             return sonuc;
         }
+        //[HttpGet]
+        //[Route("Login")]
+        //public Sonuc GetLogin(string kod, string sifre)
+        //{
+        //    Sonuc sonuc = new Sonuc();
+        //    CariIslemler ci = new CariIslemler();
+
+        //    sonuc = ci.SifreKontrol(kod, sifre);
+        //    sonuc.servisUlasmaBasari = true;
+
+        //    return sonuc;
+        //}
+
         [HttpGet]
         [Route("CariEkstrePDFAl/{baslangicTarihi}/{bitisTarihi}/{cariKodu}")]
         public Sonuc GetCariEkstrePDFAl(string baslangicTarihi, string bitisTarihi, string cariKodu)
