@@ -120,5 +120,35 @@ namespace B2b_Api.Controllers
             sonuc.servisUlasmaBasari = true;
             return sonuc;
         }
+        [HttpPost]
+        [Route("CariListedenAramadanStokkartlariniOku")]
+        public Sonuc AramadanStokkartlariniOku([FromBody] SayfalamaBilgileri sb, string cariKodu)
+        {
+            Sonuc sonuc = new Sonuc();
+            StokIslemleri si = new StokIslemleri();
+            sonuc = si.AramaStokKartlariniBul(sb);
+           List <StokKartBilgileri> skbListe = new List<StokKartBilgileri>();
+            skbListe = sonuc.data as List<StokKartBilgileri>;
+            if (skbListe == null)
+            {
+                sonuc.mesaj = "Stok kartları okunamadı.";
+                sonuc.sonuc = false;
+                sonuc.veriOkuBasari = false;
+                sonuc.servisUlasmaBasari = true;
+                return sonuc;
+            }
+            if (skbListe.Count == 0)
+            {
+                sonuc.mesaj = "Stok kartları bulunamadı.";
+                sonuc.sonuc = false;
+                sonuc.veriOkuBasari = true;
+                sonuc.servisUlasmaBasari = true;
+                return sonuc;
+            }
+            CariIslemler ci = new CariIslemler();
+            sonuc = ci.StokFiyatlariniCariListedenAl(skbListe, cariKodu);
+            sonuc.servisUlasmaBasari = true;
+            return sonuc;
+        }
     }
 }
