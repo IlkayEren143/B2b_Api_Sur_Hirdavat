@@ -20,6 +20,18 @@ namespace B2b_Api.Servisler
             sonuc.ekData = sayac;
             return sonuc;
         }
+        public Sonuc AramaStokKartlariniBul(SayfalamaBilgileri sb)
+        {
+            Sonuc sonuc = new Sonuc();
+           
+            string ekSorgu = StokEkSorguOlustur(sb);
+            int sayac = StokSayisiniBul(sb.ekSorgu);
+            sb.ekSorgu = ekSorgu;
+            sonuc = StokKartlariniAl(sb, false);
+           
+            sonuc.ekData = sayac;
+            return sonuc;
+        }
         public decimal DovizKurunuOku(string dovizKodu, string dovizTuru, DateTime tarih)
         {
             string eksorgu = $"WHERE DOVHARKOD = '{dovizKodu}' AND DOVHARTUR = '{dovizTuru}' AND DOVHARTAR = '{tarih.ToString("yyyyMMdd")}'";
@@ -270,9 +282,10 @@ namespace B2b_Api.Servisler
         //}
         private string StokKartKriterleriniOlustur(SayfalamaBilgileri sb)
         {
-            string eksorgu = "WHERE 1 = 1";
+            string eksorgu = "WHERE ISNULL(STKOZKOD5,'') <> ''";
             string eksorgu1 = "";
             string eksorgu2 = "";
+            string collate = sb?.karakterDuyarTipiFlag == 1 ? " COLLATE Turkish_CS_AS " : " COLLATE Turkish_CI_AS ";
             if (sb == null)
                 return eksorgu;
             if (!string.IsNullOrEmpty(sb.ekSorgu))
@@ -292,400 +305,456 @@ namespace B2b_Api.Servisler
                             if (!string.IsNullOrEmpty(sfb.stokKodu))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKKOD = '{sfb.stokKodu}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKKOD {collate} = '{sfb.stokKodu}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKKOD = '{sfb.stokKodu}'";
+                                    eksorgu2 += $" OR STKKOD {collate} = '{sfb.stokKodu}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.stokCinsi))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKCINSI = '{sfb.stokCinsi}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKCINSI {collate} = '{sfb.stokCinsi}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKCINSI = '{sfb.stokCinsi}'";
+                                    eksorgu2 += $" OR STKCINSI {collate} = '{sfb.stokCinsi}'";
+                            }
+                            if (!string.IsNullOrEmpty(sfb.stokCinsi2))
+                            {
+                                if (eksorgu1 == "")
+                                { eksorgu2 += $" STKCINSI2 {collate} = '{sfb.stokCinsi2}'"; eksorgu1 = "var"; }
+                                else
+                                    eksorgu2 += $" OR STKCINSI2 {collate} = '{sfb.stokCinsi2}'";
+                            }
+                            if (!string.IsNullOrEmpty(sfb.stokCinsi3))
+                            {
+                                if (eksorgu1 == "")
+                                { eksorgu2 += $" STKCINSI3 {collate} = '{sfb.stokCinsi3}'"; eksorgu1 = "var"; }
+                                else
+                                    eksorgu2 += $" OR STKCINSI3 {collate} = '{sfb.stokCinsi3}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.barkod))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKBARKOD = '{sfb.barkod}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKBARKOD {collate} = '{sfb.barkod}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKBARKOD = '{sfb.barkod}'";
+                                    eksorgu2 += $" OR STKBARKOD {collate} = '{sfb.barkod}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod1))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD1 = '{sfb.ozelKod1}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD1 {collate} = '{sfb.ozelKod1}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD1 = '{sfb.ozelKod1}'";
+                                    eksorgu2 += $" OR STKOZKOD1 {collate} = '{sfb.ozelKod1}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod2))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD2 = '{sfb.ozelKod2}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD2 {collate} = '{sfb.ozelKod2}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD2 = '{sfb.ozelKod2}'";
+                                    eksorgu2 += $" OR STKOZKOD2 {collate} = '{sfb.ozelKod2}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod3))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD3 = '{sfb.ozelKod3}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD3 {collate} = '{sfb.ozelKod3}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD3 = '{sfb.ozelKod3}'";
+                                    eksorgu2 += $" OR STKOZKOD3 {collate} = '{sfb.ozelKod3}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod4))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD4 = '{sfb.ozelKod4}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD4 {collate} = '{sfb.ozelKod4}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD4 = '{sfb.ozelKod4}'";
+                                    eksorgu2 += $" OR STKOZKOD4 {collate} = '{sfb.ozelKod4}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod5))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD5 = '{sfb.ozelKod5}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD5 {collate} = '{sfb.ozelKod5}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD5 = '{sfb.ozelKod5}'";
+                                    eksorgu2 += $" OR STKOZKOD5 {collate} = '{sfb.ozelKod5}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama1))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK1 = '{sfb.aciklama1}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK1 {collate} = '{sfb.aciklama1}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK1 = '{sfb.aciklama1}'";
+                                    eksorgu2 += $" OR STKACIK1 {collate} = '{sfb.aciklama1}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama2))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK2 = '{sfb.aciklama2}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK2 {collate} = '{sfb.aciklama2}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK2 = '{sfb.aciklama2}'";
+                                    eksorgu2 += $" OR STKACIK2 {collate} = '{sfb.aciklama2}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama3))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK3 = '{sfb.aciklama3}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK3 {collate} = '{sfb.aciklama3}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK3 = '{sfb.aciklama3}'";
+                                    eksorgu2 += $" OR STKACIK3 {collate} = '{sfb.aciklama3}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama4))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK4 = '{sfb.aciklama4}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK4 {collate} = '{sfb.aciklama4}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK4 = '{sfb.aciklama4}'";
+                                    eksorgu2 += $" OR STKACIK4 {collate} = '{sfb.aciklama4}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama5))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK5 = '{sfb.aciklama5}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK5 {collate} = '{sfb.aciklama5}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK5 = '{sfb.aciklama5}'";
+                                    eksorgu2 += $" OR STKACIK5 {collate} = '{sfb.aciklama5}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.grupKodu))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKGRUPKOD = '{sfb.grupKodu}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKGRUPKOD {collate} = '{sfb.grupKodu}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKGRUPKOD = '{sfb.grupKodu}'";
+                                    eksorgu2 += $" OR STKGRUPKOD {collate} = '{sfb.grupKodu}'";
                             }
                             break;
                         case 1:
                             if (!string.IsNullOrEmpty(sfb.stokKodu))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKKOD LIKE '{sfb.stokKodu}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKKOD {collate} LIKE '{sfb.stokKodu}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKKOD LIKE '{sfb.stokKodu}%'";
+                                    eksorgu2 += $" OR STKKOD {collate} LIKE '{sfb.stokKodu}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.stokCinsi))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKCINSI LIKE '{sfb.stokCinsi}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKCINSI {collate} LIKE '{sfb.stokCinsi}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKCINSI LIKE '{sfb.stokCinsi}%'";
+                                    eksorgu2 += $" OR STKCINSI {collate} LIKE '{sfb.stokCinsi}%'";
+                            }
+                            if (!string.IsNullOrEmpty(sfb.stokCinsi2))
+                            {
+                                if (eksorgu1 == "")
+                                { eksorgu2 += $" STKCINSI2 {collate} LIKE '{sfb.stokCinsi2}%'"; eksorgu1 = "var"; }
+                                else
+                                    eksorgu2 += $" OR STKCINSI2 {collate} LIKE '{sfb.stokCinsi2}%'";
+                            }
+                            if (!string.IsNullOrEmpty(sfb.stokCinsi3))
+                            {
+                                if (eksorgu1 == "")
+                                { eksorgu2 += $" STKCINSI3 {collate} LIKE '{sfb.stokCinsi3}%'"; eksorgu1 = "var"; }
+                                else
+                                    eksorgu2 += $" OR STKCINSI3 {collate} LIKE '{sfb.stokCinsi3}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.barkod))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKBARKOD LIKE '{sfb.barkod}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKBARKOD {collate} LIKE '{sfb.barkod}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKBARKOD LIKE '{sfb.barkod}%'";
+                                    eksorgu2 += $" OR STKBARKOD {collate} LIKE '{sfb.barkod}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod1))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD1  LIKE '{sfb.ozelKod1}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD1 {collate} LIKE '{sfb.ozelKod1}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD1 LIKE '{sfb.ozelKod1}%'";
+                                    eksorgu2 += $" OR STKOZKOD1 {collate} LIKE '{sfb.ozelKod1}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod2))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD2 LIKE '{sfb.ozelKod2}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD2 {collate} LIKE '{sfb.ozelKod2}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD2  LIKE '{sfb.ozelKod2}%'";
+                                    eksorgu2 += $" OR STKOZKOD2 {collate} LIKE '{sfb.ozelKod2}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod3))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD3  LIKE '{sfb.ozelKod3}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD3 {collate} LIKE '{sfb.ozelKod3}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD3  LIKE '{sfb.ozelKod3}%'";
+                                    eksorgu2 += $" OR STKOZKOD3 {collate} LIKE '{sfb.ozelKod3}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod4))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD4  LIKE '{sfb.ozelKod4}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD4 {collate} LIKE '{sfb.ozelKod4}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD4  LIKE '{sfb.ozelKod4}%'";
+                                    eksorgu2 += $" OR STKOZKOD4 {collate} LIKE '{sfb.ozelKod4}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod5))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD5  LIKE '{sfb.ozelKod5}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD5 {collate} LIKE '{sfb.ozelKod5}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD5  LIKE '{sfb.ozelKod5}%'";
+                                    eksorgu2 += $" OR STKOZKOD5 {collate} LIKE '{sfb.ozelKod5}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama1))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK1  LIKE '{sfb.aciklama1}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK1 {collate} LIKE '{sfb.aciklama1}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK1  LIKE '{sfb.aciklama1}%'";
+                                    eksorgu2 += $" OR STKACIK1 {collate} LIKE '{sfb.aciklama1}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama2))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK2  LIKE '{sfb.aciklama2}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK2 {collate} LIKE '{sfb.aciklama2}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK2  LIKE '{sfb.aciklama2}%'";
+                                    eksorgu2 += $" OR STKACIK2 {collate} LIKE '{sfb.aciklama2}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama3))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK3  LIKE '{sfb.aciklama3}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK3 {collate} LIKE '{sfb.aciklama3}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK3  LIKE '{sfb.aciklama3}%'";
+                                    eksorgu2 += $" OR STKACIK3 {collate} LIKE '{sfb.aciklama3}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama4))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK4  LIKE '{sfb.aciklama4}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK4 {collate} LIKE '{sfb.aciklama4}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK4  LIKE '{sfb.aciklama4}%'";
+                                    eksorgu2 += $" OR STKACIK4 {collate} LIKE '{sfb.aciklama4}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama5))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK5  LIKE '{sfb.aciklama5}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK5 {collate} LIKE '{sfb.aciklama5}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK5  LIKE '{sfb.aciklama5}%'";
+                                    eksorgu2 += $" OR STKACIK5 {collate} LIKE '{sfb.aciklama5}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.grupKodu))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKGRUPKOD  LIKE '{sfb.grupKodu}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKGRUPKOD {collate} LIKE '{sfb.grupKodu}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKGRUPKOD  LIKE '{sfb.grupKodu}%'";
+                                    eksorgu2 += $" OR STKGRUPKOD {collate} LIKE '{sfb.grupKodu}%'";
                             }
                             break;
                         case 2:
                             if (!string.IsNullOrEmpty(sfb.stokKodu))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKKOD  LIKE '%{sfb.stokKodu}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKKOD {collate}  LIKE '%{sfb.stokKodu}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKKOD  LIKE '%{sfb.stokKodu}'";
+                                    eksorgu2 += $" OR STKKOD {collate} LIKE '%{sfb.stokKodu}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.stokCinsi))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKCINSI  LIKE '%{sfb.stokCinsi}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKCINSI {collate} LIKE '%{sfb.stokCinsi}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKCINSI  LIKE '%{sfb.stokCinsi}'";
+                                    eksorgu2 += $" OR STKCINSI {collate} LIKE '%{sfb.stokCinsi}'";
+                            }
+                            if (!string.IsNullOrEmpty(sfb.stokCinsi2))
+                            {
+                                if (eksorgu1 == "")
+                                { eksorgu2 += $" STKCINSI2 {collate} LIKE '%{sfb.stokCinsi2}'"; eksorgu1 = "var"; }
+                                else
+                                    eksorgu2 += $" OR STKCINSI2 {collate} LIKE '%{sfb.stokCinsi2}'";
+                            }
+                            if (!string.IsNullOrEmpty(sfb.stokCinsi3))
+                            {
+                                if (eksorgu1 == "")
+                                { eksorgu2 += $" STKCINSI3 {collate} LIKE '%{sfb.stokCinsi3}'"; eksorgu1 = "var"; }
+                                else
+                                    eksorgu2 += $" OR STKCINSI3 {collate} LIKE '%{sfb.stokCinsi3}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.barkod))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKBARKOD  LIKE '%{sfb.barkod}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKBARKOD {collate} LIKE '%{sfb.barkod}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKBARKOD  LIKE '%{sfb.barkod}'";
+                                    eksorgu2 += $" OR STKBARKOD {collate} LIKE '%{sfb.barkod}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod1))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD1  LIKE '%{sfb.ozelKod1}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD1 {collate} LIKE '%{sfb.ozelKod1}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD1  LIKE '%{sfb.ozelKod1}'";
+                                    eksorgu2 += $" OR STKOZKOD1 {collate} LIKE '%{sfb.ozelKod1}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod2))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD2  LIKE '%{sfb.ozelKod2}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD2 {collate} LIKE '%{sfb.ozelKod2}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD2  LIKE '%{sfb.ozelKod2}'";
+                                    eksorgu2 += $" OR STKOZKOD2 {collate} LIKE '%{sfb.ozelKod2}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod3))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD3  LIKE '%{sfb.ozelKod3}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD3 {collate} LIKE '%{sfb.ozelKod3}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD3  LIKE '%{sfb.ozelKod3}'";
+                                    eksorgu2 += $" OR STKOZKOD3 {collate} LIKE '%{sfb.ozelKod3}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod4))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD4  LIKE '%{sfb.ozelKod4}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD4 {collate} LIKE '%{sfb.ozelKod4}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD4  LIKE '%{sfb.ozelKod4}'";
+                                    eksorgu2 += $" OR STKOZKOD4 {collate} LIKE '%{sfb.ozelKod4}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod5))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD5  LIKE '%{sfb.ozelKod5}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD5 {collate} LIKE '%{sfb.ozelKod5}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD5  LIKE '%{sfb.ozelKod5}'";
+                                    eksorgu2 += $" OR STKOZKOD5 {collate} LIKE '%{sfb.ozelKod5}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama1))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK1  LIKE '%{sfb.aciklama1}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK1 {collate} LIKE '%{sfb.aciklama1}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK1  LIKE '%{sfb.aciklama1}'";
+                                    eksorgu2 += $" OR STKACIK1 {collate} LIKE '%{sfb.aciklama1}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama2))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK2  LIKE '%{sfb.aciklama2}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK2 {collate} LIKE '%{sfb.aciklama2}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK2  LIKE '%{sfb.aciklama2}'";
+                                    eksorgu2 += $" OR STKACIK2 {collate} LIKE '%{sfb.aciklama2}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama3))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK3  LIKE '%{sfb.aciklama3}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK3 {collate} LIKE '%{sfb.aciklama3}'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK3  LIKE '%{sfb.aciklama3}'";
+                                    eksorgu2 += $" OR STKACIK3 {collate} LIKE '%{sfb.aciklama3}'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama4))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK4  LIKE '%{sfb.aciklama4}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK4 {collate} LIKE '%{sfb.aciklama4}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK4  LIKE '%{sfb.aciklama4}'";
+                                    eksorgu2 += $" OR STKACIK4 {collate} LIKE '%{sfb.aciklama4}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama5))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK5  LIKE '%{sfb.aciklama5}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK5 {collate} LIKE '%{sfb.aciklama5}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK5  LIKE '%{sfb.aciklama5}'";
+                                    eksorgu2 += $" OR STKACIK5 {collate} LIKE '%{sfb.aciklama5}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.grupKodu))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKGRUPKOD  LIKE '%{sfb.grupKodu}'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKGRUPKOD {collate} LIKE '%{sfb.grupKodu}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKGRUPKOD  LIKE '%{sfb.grupKodu}'";
+                                    eksorgu2 += $" OR STKGRUPKOD {collate} LIKE '%{sfb.grupKodu}%'";
                             }
                             break;
                         case 3:
                             if (!string.IsNullOrEmpty(sfb.stokKodu))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKKOD  LIKE '%{sfb.stokKodu}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKKOD {collate} LIKE '%{sfb.stokKodu}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKKOD  LIKE '%{sfb.stokKodu}%'";
+                                    eksorgu2 += $" OR STKKOD {collate} LIKE '%{sfb.stokKodu}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.stokCinsi))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKCINSI  LIKE '%{sfb.stokCinsi}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKCINSI {collate} LIKE '%{sfb.stokCinsi}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKCINSI  LIKE '%{sfb.stokCinsi}%'";
+                                    eksorgu2 += $" OR STKCINSI {collate} LIKE '%{sfb.stokCinsi}%'";
+                            }
+                            if (!string.IsNullOrEmpty(sfb.stokCinsi2))
+                            {
+                                if (eksorgu1 == "")
+                                { eksorgu2 += $" STKCINSI2 {collate} LIKE '%{sfb.stokCinsi2}%'"; eksorgu1 = "var"; }
+                                else
+                                    eksorgu2 += $" OR STKCINSI2 {collate} LIKE '%{sfb.stokCinsi2}%'";
+                            }
+                            if (!string.IsNullOrEmpty(sfb.stokCinsi3))
+                            {
+                                if (eksorgu1 == "")
+                                { eksorgu2 += $" STKCINSI3 {collate} LIKE '%{sfb.stokCinsi3}%'"; eksorgu1 = "var"; }
+                                else
+                                    eksorgu2 += $" OR STKCINSI3 {collate} LIKE '%{sfb.stokCinsi3}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.barkod))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKBARKOD  LIKE '%{sfb.barkod}%'"; eksorgu1 = "var";}
+                                { eksorgu2 += $" STKBARKOD {collate} LIKE '%{sfb.barkod}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKBARKOD  LIKE '%{sfb.barkod}%'";
+                                    eksorgu2 += $" OR STKBARKOD {collate} LIKE '%{sfb.barkod}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod1))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD1  LIKE '%{sfb.ozelKod1}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD1 {collate} LIKE '%{sfb.ozelKod1}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD1  LIKE '%{sfb.ozelKod1}%'";
+                                    eksorgu2 += $" OR STKOZKOD1 {collate} LIKE '%{sfb.ozelKod1}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod2))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD2  LIKE '%{sfb.ozelKod2}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD2 {collate} LIKE '%{sfb.ozelKod2}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD2  LIKE '%{sfb.ozelKod2}%'";
+                                    eksorgu2 += $" OR STKOZKOD2 {collate} LIKE '%{sfb.ozelKod2}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod3))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD3  LIKE '%{sfb.ozelKod3}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD3 {collate} LIKE '%{sfb.ozelKod3}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD3  LIKE '%{sfb.ozelKod3}%'";
+                                    eksorgu2 += $" OR STKOZKOD3 {collate} LIKE '%{sfb.ozelKod3}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod4))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD4  LIKE '%{sfb.ozelKod4}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD4 {collate} LIKE '%{sfb.ozelKod4}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD4  LIKE '%{sfb.ozelKod4}%'";
+                                    eksorgu2 += $" OR STKOZKOD4 {collate} LIKE '%{sfb.ozelKod4}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.ozelKod5))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKOZKOD5  LIKE '%{sfb.ozelKod5}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKOZKOD5 {collate} LIKE '%{sfb.ozelKod5}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKOZKOD5  LIKE '%{sfb.ozelKod5}%'";
+                                    eksorgu2 += $" OR STKOZKOD5 {collate} LIKE '%{sfb.ozelKod5}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama1))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK1  LIKE '%{sfb.aciklama1}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK1 {collate} LIKE '%{sfb.aciklama1}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK1  LIKE '%{sfb.aciklama1}%'";
+                                    eksorgu2 += $" OR STKACIK1 {collate} LIKE '%{sfb.aciklama1}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama2))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK2  LIKE '%{sfb.aciklama2}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK2 {collate} LIKE '%{sfb.aciklama2}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK2  LIKE '%{sfb.aciklama2}%'";
+                                    eksorgu2 += $" OR STKACIK2 {collate} LIKE '%{sfb.aciklama2}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama3))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK3  LIKE '%{sfb.aciklama3}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK3 {collate} LIKE '%{sfb.aciklama3}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK3  LIKE '%{sfb.aciklama3}%'";
+                                    eksorgu2 += $" OR STKACIK3 {collate} LIKE '%{sfb.aciklama3}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama4))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK4  LIKE '%{sfb.aciklama4}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK4 {collate} LIKE '%{sfb.aciklama4}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK4  LIKE '%{sfb.aciklama4}%'";
+                                    eksorgu2 += $" OR STKACIK4 {collate} LIKE '%{sfb.aciklama4}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.aciklama5))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKACIK5  LIKE '%{sfb.aciklama5}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKACIK5 {collate} LIKE '%{sfb.aciklama5}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKACIK5  LIKE '%{sfb.aciklama5}%'";
+                                    eksorgu2 += $" OR STKACIK5 {collate} LIKE '%{sfb.aciklama5}%'";
                             }
                             if (!string.IsNullOrEmpty(sfb.grupKodu))
                             {
                                 if (eksorgu1 == "")
-                                { eksorgu2 += $" STKGRUPKOD  LIKE '%{sfb.grupKodu}%'"; eksorgu1 = "var"; }
+                                { eksorgu2 += $" STKGRUPKOD {collate} LIKE '%{sfb.grupKodu}%'"; eksorgu1 = "var"; }
                                 else
-                                    eksorgu2 += $" OR STKGRUPKOD  LIKE '%{sfb.grupKodu}%'";
+                                    eksorgu2 += $" OR STKGRUPKOD {collate} LIKE '%{sfb.grupKodu}%'";
                             }
                             break;
                     }
@@ -769,6 +838,47 @@ namespace B2b_Api.Servisler
             SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
             DataTable tablo = asi.Sorgu_Adaptor(komutstr);
             return tablo;
+        }
+        private string StokEkSorguOlustur(SayfalamaBilgileri sb)
+        {
+            string eksorgu = "WHERE ISNULL(STKOZKOD5,'') <> ''";
+            string json = sb.veriSorgulama.ToString();
+
+            StokFiltreBilgileri sfb = Newtonsoft.Json.JsonConvert.DeserializeObject<StokFiltreBilgileri>(json);
+            string arama = sfb.stokKodu;
+            string collate = sb?.karakterDuyarTipiFlag == 1 ? " COLLATE Turkish_CS_AS " : " COLLATE Turkish_CI_AS ";
+
+            string[] aramaParcalari = arama.Split(' ');
+            foreach (string parca in aramaParcalari)
+            {
+                if (!string.IsNullOrEmpty(parca))
+                {
+                    eksorgu += $" AND (STKKOD {collate} LIKE '%{parca}%' OR STKCINSI {collate} LIKE '%{parca}%' OR STKCINSI2 {collate} LIKE '%{parca}%')";
+                }
+            }
+            sb.ekSorgu = eksorgu;
+            if (sb.sayfaUzunlugu > 0)
+            {
+                switch (sb.siralamaTipiFlag)
+                {
+                    case 0:
+                        eksorgu += $" ORDER BY STKKOD OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                        break;
+                    case 1:
+                        eksorgu += $" ORDER BY STKCINSI OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                        break;
+                    case 2:
+                        eksorgu += $" ORDER BY STKCINSI DESC OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                        break;
+                    case 3:
+                        eksorgu += $" ORDER BY STKFIYAT OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                        break;
+                    case 4:
+                        eksorgu += $" ORDER BY STKFIYAT DESC OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                        break;
+                }
+            }
+            return eksorgu;
         }
     }
 }

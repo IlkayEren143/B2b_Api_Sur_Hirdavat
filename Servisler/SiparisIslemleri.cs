@@ -55,8 +55,12 @@ namespace B2b_Api.Servisler
                 sonuc.mesaj = "İlgili id'ye ait sepet daha önce ETA'ya kaydedilmiş. Lütfen kontrol ediniz.";
                 return sonuc;
             }
-            decimal kurFis = si.DovizKurunuOku(tabloFis.Rows[0]["DovizKodu"].ToString(), tabloFis.Rows[0]["DovizTuru"].ToString(), DateTime.Today);
-            
+
+            decimal kurFis = 0;
+            if (tabloFis.Rows[0]["DovizKodu"].ToString().Trim() == "" || tabloFis.Rows[0]["DovizTuru"].ToString().Trim() == "")
+                kurFis = 1;
+            else
+                kurFis = si.DovizKurunuOku(tabloFis.Rows[0]["DovizKodu"].ToString(), tabloFis.Rows[0]["DovizTuru"].ToString(), DateTime.Today);
             if (kurFis < 0)
             {
                 sonuc.sonuc = false;
@@ -99,7 +103,11 @@ namespace B2b_Api.Servisler
             }
             foreach (DataRow satir in tabloHareket.Rows)
             {
-                decimal kurHareket = si.DovizKurunuOku(satir["DovizKodu"].ToString(), satir["DovizTuru"].ToString(), DateTime.Today);
+                decimal kurHareket = 0;
+                if (satir["DovizKodu"].ToString().Trim() == "" || satir["DovizTuru"].ToString().Trim() == "")
+                    kurHareket = 1;
+                else
+                    kurHareket = si.DovizKurunuOku(satir["DovizKodu"].ToString(), satir["DovizTuru"].ToString(), DateTime.Today);
                 if (kurHareket < 0)
                 {
                     sonuc.sonuc = false;
@@ -142,6 +150,11 @@ namespace B2b_Api.Servisler
                 sonuc.data = refno;
                 sonuc.ekData = null;
             }
+            tfi.tfb.etakayitdurum = refno;
+            tfi.tfb.etakayittarih = DateTime.Today;
+            tfi.tfb.etasirketadi = etaVeriTabani;
+            tfi.TeklifFisETADuzenle($"WHERE id = {teklifid}");
+
             return sonuc;
         }
         public Sonuc BekleyenSiparislerPDFAl(string cariKodu)

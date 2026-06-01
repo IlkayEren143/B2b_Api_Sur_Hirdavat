@@ -13,6 +13,7 @@ namespace B2b_Api.Models
                                                  // 0-Cari koduna göre 1-Ünvana göre a->z 2-Ünvana göre z->a 3-Bakiyeye göre artan 4-Bakiyeye göre azalan (Cari için)
                                                  //0-Cari koduna göre 1-Ünvana göre a->z 2-Ünvana göre z->a 3-TeklifNo'ya göre a->z 4-TeklifNo'ya göre z->a 5-Tarihe göre artan 6-Tarihe göre azalan (Teklif için)
         public int aramaTipiFlag { get; set; } //0: eşit 1: başlayan 2: biten 3 içinde
+        public int karakterDuyarTipiFlag { get; set; } //0: duyarsız 1: duyarlı
         public string ekSorgu { get; set; } //Buradaki veri dolu ise diğer veri sorgulamadaki veriler gözardı edilecek. 
         public object veriSorgulama { get; set; }
 

@@ -44,6 +44,8 @@ namespace B2b_Api.Models
     {
         public string stokKodu { get; set; }
         public string stokCinsi { get; set; }
+        public string stokCinsi2 { get; set; }
+        public string stokCinsi3 { get; set; }
         public string barkod { get; set; }
         public string ozelKod1 { get; set; }
         public string ozelKod2 { get; set; }

@@ -17,6 +17,7 @@ using DevExpress.XtraReports.UI;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using DevExpress.DirectX;
 
 namespace B2b_Api.Servisler
 {
@@ -281,6 +282,30 @@ namespace B2b_Api.Servisler
                 komut.Parameters.AddWithValue("@KimlikNo", tfb.kimlikno);
                 komut.Parameters.AddWithValue("@EMail", tfb.email);
                 komut.Parameters.AddWithValue("@TelefonNo", tfb.telefonno);
+                Ana_SQL_Islemleri asi = new Ana_SQL_Islemleri(tfi_baglanti, tfi_transaction, tfi_komutCalismaSuresi);
+                bool sonuc = false;
+                if (tfi_transaction == null)
+                { sonuc = asi.Komut_ExecuteNonQuery(komut, hatagoster, "TeklifFisIslemleri : TeklifFisDuzenle"); hataMesaji = asi.hataMesaji; }
+                else
+                { sonuc = asi.Komut_ExecuteNonQuery_Transaction(komut, hatagoster, "TeklifFisIslemleri : TeklifFisDuzenle"); hataMesaji = asi.hataMesaji; }
+                return sonuc;
+            }
+            catch (Exception ex)
+            {
+                hataMesaji = ex.Message;
+                return false;
+            }
+        }
+        public bool TeklifFisETADuzenle(string eksorgu = "", bool hatagoster = false)
+        {
+            try
+            {
+                string komutstr = @"UPDATE TeklifFis SET ETAKayitDurum = @ETAKayitDurum, ETAKayitTarih = @ETAKayitTarih, ETASirketAdi = @ETASirketAdi";
+                komutstr += " " + eksorgu;
+                SqlCommand komut = new SqlCommand(komutstr);
+                komut.Parameters.AddWithValue("@ETAKayitDurum", tfb.etakayitdurum);
+                komut.Parameters.AddWithValue("@ETAKayitTarih", tfb.etakayittarih);
+                komut.Parameters.AddWithValue("@ETASirketAdi", tfb.etasirketadi);
                 Ana_SQL_Islemleri asi = new Ana_SQL_Islemleri(tfi_baglanti, tfi_transaction, tfi_komutCalismaSuresi);
                 bool sonuc = false;
                 if (tfi_transaction == null)
@@ -630,7 +655,7 @@ namespace B2b_Api.Servisler
         {
             Sonuc sonuc = new Sonuc();
             SayfalamaBilgileri sb = new SayfalamaBilgileri();
-            sb.ekSorgu = $"WHERE CariKodu = '{cariKodu}' AND FisTipi = 0";
+            sb.ekSorgu = $"WHERE CariKodu = '{cariKodu}' AND FisTipi = 0 AND ETAKayitDurum = 0";
             sonuc = TeklifFisListesiniAl(sb, "");
             if (!sonuc.sonuc)
             {
@@ -721,30 +746,47 @@ namespace B2b_Api.Servisler
         public Sonuc SepetEkle(TeklifEvrakBilgileri evrak)
         {
             evrak.tfb.fistipi = 0;
-            if (evrak.tfb.id == 0)
+            Sonuc sonuc = new Sonuc();
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            baglanti.Open();
+            SqlTransaction transaction = baglanti.BeginTransaction();
+            TeklifFisIslemleri tfi = new TeklifFisIslemleri(baglanti, transaction);
+            sonuc = SepetSil(evrak.tfb.carikodu, baglanti, transaction);
+            if (!sonuc.sonuc)
             {
-                Sonuc sonuc = new Sonuc();
-                string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
-                SqlConnection baglanti = new SqlConnection(baglantistr);
-                TeklifFisIslemleri tfi = new TeklifFisIslemleri(baglanti);
-                string ekSorgu = $"WHERE CariKodu = '{evrak.tfb.carikodu}' AND FisTipi = 0";
-                DataTable tablo = tfi.TeklifFisOku(ekSorgu);
-                if (tablo == null)
-                {
-                    sonuc.sonuc = false;
-                    sonuc.veriOkuBasari = false;
-                    sonuc.mesaj = "Fiş tablosu okunamadı. " + tfi.hataMesaji;
-                    return sonuc;
-                }
-                if (tablo.Rows.Count > 0)
-                {
-                    sonuc.sonuc = false;
-                    sonuc.veriOkuBasari = true;
-                    sonuc.mesaj = "İlgili cari kartın daha önceden kalma sepeti bulunmakta. Ya sepeti silin ya da sepeti çağırın.";
-                    return sonuc;
-                }
+                transaction.Rollback();
+                baglanti.Close();
+                return sonuc;
             }
-            return TeklifKaydet(evrak);
+            string ekSorgu = $"WHERE CariKodu = '{evrak.tfb.carikodu}' AND FisTipi = 0 AND ETAKayitDurum = 0";
+            DataTable tablo = tfi.TeklifFisOku(ekSorgu);
+            if (tablo == null)
+            {
+                transaction.Rollback();
+                baglanti.Close();
+                sonuc.sonuc = false;
+                sonuc.veriOkuBasari = false;
+                sonuc.mesaj = "Fiş tablosu okunamadı. " + tfi.hataMesaji;
+                return sonuc;
+            }
+            if (tablo.Rows.Count > 0)
+            {
+                transaction.Rollback();
+                baglanti.Close();
+                sonuc.sonuc = false;
+                sonuc.veriOkuBasari = true;
+                sonuc.mesaj = "İlgili cari kartın daha önceden kalma sepeti bulunmakta. Ya sepeti silin ya da sepeti çağırın.";
+                return sonuc;
+            }
+            sonuc = TeklifKaydet(evrak);
+            if (!sonuc.sonuc)
+            {
+                transaction.Rollback();
+                baglanti.Close();
+                return sonuc;
+            }
+            return sonuc;
         }
         public Sonuc SepetPDFAl(int teklifId)
         {
@@ -783,6 +825,46 @@ namespace B2b_Api.Servisler
             }
             transaction.Commit();
             baglanti.Close();
+            sonuc.sonuc = true;
+            sonuc.veriOkuBasari = true;
+            sonuc.data = evrak;
+            sonuc.mesaj = "Başarılı";
+            return sonuc;
+        }
+        public Sonuc SepetSil(string cariKodu, SqlConnection baglanti, SqlTransaction transaction)
+        {
+            Sonuc sonuc = new Sonuc();
+            sonuc = SepetOku(cariKodu);
+            if (!sonuc.sonuc && !sonuc.veriOkuBasari)
+                return sonuc;
+            
+            TeklifEvrakBilgileri evrak = sonuc.data as TeklifEvrakBilgileri;
+            if (evrak == null)
+               
+            {
+                sonuc.sonuc = true;
+                return sonuc;
+            }
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+           
+            TeklifHareketIslemleri thi = new TeklifHareketIslemleri(baglanti, transaction);
+            if (!thi.TeklifHareketSil($"WHERE Fisid = {evrak.tfb.id}"))
+            {
+                sonuc.sonuc = false;
+                sonuc.mesaj = "Hareket tablosu silinemedi. " + thi.hataMesaji;
+                sonuc.veriOkuBasari = false;
+                return sonuc;
+            }
+            TeklifFisIslemleri tfi = new TeklifFisIslemleri(baglanti, transaction);
+            if (!tfi.TeklifFisSil($"WHERE id = {evrak.tfb.id}"))
+            {
+               
+                sonuc.sonuc = false;
+                sonuc.mesaj = "Fiş tablosu silinemedi. " + thi.hataMesaji;
+                sonuc.veriOkuBasari = false;
+                return sonuc;
+            }
+          
             sonuc.sonuc = true;
             sonuc.veriOkuBasari = true;
             sonuc.data = evrak;

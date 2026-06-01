@@ -110,5 +110,15 @@ namespace B2b_Api.Controllers
             sonuc.servisUlasmaBasari = true;
             return sonuc;
         }
+        [HttpPost]
+        [Route("AramadanStokkartlariniOku")]
+        public Sonuc AramadanStokkartlariniOku([FromBody] SayfalamaBilgileri sb)
+        {
+            Sonuc sonuc = new Sonuc();
+            StokIslemleri si = new StokIslemleri();
+            sonuc = si.AramaStokKartlariniBul(sb);
+            sonuc.servisUlasmaBasari = true;
+            return sonuc;
+        }
     }
 }
