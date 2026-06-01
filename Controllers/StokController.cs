@@ -127,7 +127,8 @@ namespace B2b_Api.Controllers
             Sonuc sonuc = new Sonuc();
             StokIslemleri si = new StokIslemleri();
             sonuc = si.AramaStokKartlariniBul(sb);
-           List <StokKartBilgileri> skbListe = new List<StokKartBilgileri>();
+            int sayac = sonuc.ekData != null ? Convert.ToInt32(sonuc.ekData) : 0;
+            List <StokKartBilgileri> skbListe = new List<StokKartBilgileri>();
             skbListe = sonuc.data as List<StokKartBilgileri>;
             if (skbListe == null)
             {
@@ -147,6 +148,7 @@ namespace B2b_Api.Controllers
             }
             CariIslemler ci = new CariIslemler();
             sonuc = ci.StokFiyatlariniCariListedenAl(skbListe, cariKodu);
+            sonuc.ekData = sayac;
             sonuc.servisUlasmaBasari = true;
             return sonuc;
         }
