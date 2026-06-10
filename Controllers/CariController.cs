@@ -19,6 +19,13 @@ namespace B2b_Api.Controllers
         public Sonuc GetTumCariKartlariOku()
         {
             Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Cari kartları okunamadı. (ls)";
+                return sonuc;
+            }
             CariIslemler ci = new CariIslemler();
             SayfalamaBilgileri parametre = new SayfalamaBilgileri();
             sonuc = ci.CariKartlariOku(parametre);
@@ -30,6 +37,13 @@ namespace B2b_Api.Controllers
         public Sonuc CariKartlariOku([FromBody] SayfalamaBilgileri sb)
         {
             Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Cari kartları okunamadı. (ls)";
+                return sonuc;
+            }
             CariIslemler ci = new CariIslemler();
             sonuc = ci.CariKartlariOku(sb);
             sonuc.servisUlasmaBasari = true;
@@ -40,6 +54,13 @@ namespace B2b_Api.Controllers
         public Sonuc GetCariKartiOku([FromUri] string cariKodu)
         {
             Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Cari kartları okunamadı.(ls)";
+                return sonuc;
+            }
             CariIslemler ci = new CariIslemler();
             SayfalamaBilgileri parametre = new SayfalamaBilgileri();
             parametre.ekSorgu = $"WHERE CARKOD = '{cariKodu}'";
@@ -52,6 +73,13 @@ namespace B2b_Api.Controllers
         public Sonuc GetLogin(string kod, string sifre)
         {
             Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Cari kartları okunamadı.(ls)";
+                return sonuc;
+            }
             CariIslemler ci = new CariIslemler();
             sonuc = ci.SifreKontrol(kod, sifre);
             sonuc.servisUlasmaBasari = true;
@@ -75,6 +103,13 @@ namespace B2b_Api.Controllers
         public Sonuc GetCariEkstrePDFAl(string baslangicTarihi, string bitisTarihi, string cariKodu)
         {
             Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Cari kartları okunamadı.(ls)";
+                return sonuc;
+            }
             CariIslemler ci = new CariIslemler();
             sonuc = ci.CariEkstrePDFAl(baslangicTarihi, bitisTarihi, cariKodu);
             return sonuc;

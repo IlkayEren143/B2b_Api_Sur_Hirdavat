@@ -57,6 +57,10 @@
     <Reference Include="Genel SQL Islemleri">
       <HintPath>..\ETA_Kayit_Islemleri\Yeni SQL ve ETA DLL'leri ve Test Programı (Decimal)\SQL Kütüphanesi\ETA İslemleri\SQL Islemleri\bin\Debug\Genel SQL Islemleri.dll</HintPath>
     </Reference>
+    <Reference Include="Horizon Genel İşlemleri, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ETA-ESN WEBApi (Şenol Makine)\Yeni SQL ve ETA DLL'leri ve Test Programı (Decimal)\Horizon Genel İşlemleri\bin\Debug\Horizon Genel İşlemleri.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.AspNetCore.Authentication.Abstractions, Version=2.3.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.AspNetCore.Authentication.Abstractions.2.3.0\lib\netstandard2.0\Microsoft.AspNetCore.Authentication.Abstractions.dll</HintPath>
     </Reference>
@@ -325,6 +329,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Servisler\CariIslemler.cs" />
     <Compile Include="Servisler\CategoryService.cs" />
+    <Compile Include="Servisler\LisanslamaIslemleri.cs" />
+    <Compile Include="Servisler\LisansSistemi.cs" />
     <Compile Include="Servisler\SiparisIslemleri.cs" />
     <Compile Include="Servisler\SliderIslemleri.cs" />
     <Compile Include="Servisler\StokIslemleri.cs" />

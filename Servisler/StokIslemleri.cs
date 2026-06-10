@@ -92,7 +92,37 @@ namespace B2b_Api.Servisler
             komut.Parameters.AddWithValue("@eksorgu", eksorgu);
             komut.Parameters.AddWithValue("@fiyatNo", Convert.ToInt32(ConfigurationManager.AppSettings["fiyatNo"]));
             komut.Parameters.AddWithValue("@etaMasterAdi", ConfigurationManager.AppSettings["etaMaster"].ToString());
-
+            string siralama = "";
+            switch (sb.siralamaTipiFlag)
+            {
+                case 0:
+                    siralama += $" STKKOD";
+                    break;
+                case 1:
+                    siralama += $" STKCINSI";
+                    break;
+                case 2:
+                    siralama += $" STKCINSI DESC"   ;
+                    break;
+                case 3:
+                    siralama += $" STKFIYAT";
+                    break;
+                case 4:
+                    siralama += $" STKFIYAT DESC";
+                    break;
+            }
+            komut.Parameters.AddWithValue("@siralama", siralama);
+            if (sb.sayfaUzunlugu > 0)
+            {
+                komut.Parameters.AddWithValue("@baslangic", (sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu + 1);
+                komut.Parameters.AddWithValue("@bitis", sb.gecerliSayfaNo * sb.sayfaUzunlugu);
+            }
+            else
+            {
+                komut.Parameters.AddWithValue("@baslangic", 0);
+                komut.Parameters.AddWithValue("@bitis", 0);
+            }
+                komut.Parameters.AddWithValue("@tip", Convert.ToInt32(ConfigurationManager.AppSettings["tip"]) > 2008 ? 1 : 0);
             SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
             DataTable tablo = asi.Komut_Adaptor(komut);
             if (tablo == null)
@@ -767,25 +797,30 @@ namespace B2b_Api.Servisler
             sb.ekSorgu = eksorgu;
             if (sb.sayfaUzunlugu > 0)
             {
-                switch (sb.siralamaTipiFlag)
+                if (Convert.ToInt32(ConfigurationManager.AppSettings["SQLVersiyon"]) > 2008)
                 {
-                    case 0:
-                        eksorgu += $" ORDER BY STKKOD OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
-                        break;
-                    case 1:
-                        eksorgu += $" ORDER BY STKCINSI OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
-                        break;
-                    case 2:
-                        eksorgu += $" ORDER BY STKCINSI DESC OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
-                        break;
-                    case 3:
-                        eksorgu += $" ORDER BY STKFIYAT OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
-                        break;
-                    case 4:
-                        eksorgu += $" ORDER BY STKFIYAT DESC OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
-                        break;                   
+                    switch (sb.siralamaTipiFlag)
+                    {
+                        case 0:
+                            eksorgu += $" ORDER BY STKKOD OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                            break;
+                        case 1:
+                            eksorgu += $" ORDER BY STKCINSI OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                            break;
+                        case 2:
+                            eksorgu += $" ORDER BY STKCINSI DESC OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                            break;
+                        case 3:
+                            eksorgu += $" ORDER BY STKFIYAT OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                            break;
+                        case 4:
+                            eksorgu += $" ORDER BY STKFIYAT DESC OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                            break;
+                    }
                 }
+                
             }
+
             return eksorgu;
         }
         private int StokSayisiniBul(String ekSorgu)
@@ -859,23 +894,26 @@ namespace B2b_Api.Servisler
             sb.ekSorgu = eksorgu;
             if (sb.sayfaUzunlugu > 0)
             {
-                switch (sb.siralamaTipiFlag)
+                if (Convert.ToInt32(ConfigurationManager.AppSettings["SQLVersiyon"]) > 2008)
                 {
-                    case 0:
-                        eksorgu += $" ORDER BY STKKOD OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
-                        break;
-                    case 1:
-                        eksorgu += $" ORDER BY STKCINSI OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
-                        break;
-                    case 2:
-                        eksorgu += $" ORDER BY STKCINSI DESC OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
-                        break;
-                    case 3:
-                        eksorgu += $" ORDER BY STKFIYAT OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
-                        break;
-                    case 4:
-                        eksorgu += $" ORDER BY STKFIYAT DESC OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
-                        break;
+                    switch (sb.siralamaTipiFlag)
+                    {
+                        case 0:
+                            eksorgu += $" ORDER BY STKKOD OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                            break;
+                        case 1:
+                            eksorgu += $" ORDER BY STKCINSI OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                            break;
+                        case 2:
+                            eksorgu += $" ORDER BY STKCINSI DESC OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                            break;
+                        case 3:
+                            eksorgu += $" ORDER BY STKFIYAT OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                            break;
+                        case 4:
+                            eksorgu += $" ORDER BY STKFIYAT DESC OFFSET {((sb.gecerliSayfaNo - 1) * sb.sayfaUzunlugu)} ROWS FETCH NEXT {sb.sayfaUzunlugu} ROWS ONLY";
+                            break;
+                    }
                 }
             }
             return eksorgu;

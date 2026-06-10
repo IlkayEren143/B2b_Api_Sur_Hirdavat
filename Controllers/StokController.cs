@@ -18,7 +18,13 @@ namespace B2b_Api.Controllers
         public Sonuc GetTumStokKartlariniOku()
         {
             Sonuc sonuc = new Sonuc();
-
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Stok kartları okunamadı.";
+                return sonuc;
+            }
             StokIslemleri si = new StokIslemleri();
             SayfalamaBilgileri sb = new SayfalamaBilgileri();
             sonuc = si.StokKartlariniOku(sb);
@@ -30,7 +36,13 @@ namespace B2b_Api.Controllers
         public Sonuc StokKartlariniOku([FromBody] SayfalamaBilgileri sb)
         {
             Sonuc sonuc = new Sonuc();
-           
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Stok kartları okunamadı.";
+                return sonuc;
+            }
             StokIslemleri si = new StokIslemleri();
             sonuc = si.StokKartlariniOku(sb);
             sonuc.servisUlasmaBasari = true;
@@ -41,6 +53,13 @@ namespace B2b_Api.Controllers
         public Sonuc GetStokKartlariniOku([FromUri] string stokKodu)
         {
             Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Stok kartları okunamadı. (ls)";
+                return sonuc;
+            }
             sonuc.servisUlasmaBasari = true;
             StokIslemleri si = new StokIslemleri();
             SayfalamaBilgileri sb = new SayfalamaBilgileri();
@@ -54,6 +73,13 @@ namespace B2b_Api.Controllers
         public Sonuc GetCariListedenStokKartlariniOku([FromUri] string cariKodu)
         {
             Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Stok kartları okunamadı (ls).";
+                return sonuc;
+            }
             List<StokKartBilgileri> skbListe = new List<StokKartBilgileri>();
             
             StokIslemleri si = new StokIslemleri();
@@ -61,7 +87,7 @@ namespace B2b_Api.Controllers
             skbListe = si.StokKartlariniListeOku(sb);
             if (skbListe == null)
             {
-                sonuc.mesaj = "Stok kartları okunamadı.";
+                sonuc.mesaj = "Stok kartları okunamadı. (ls)";
                 sonuc.sonuc = false;
                 sonuc.veriOkuBasari = false;
                 sonuc.servisUlasmaBasari = true;
@@ -86,6 +112,13 @@ namespace B2b_Api.Controllers
         public Sonuc CariListedenStokKartlariniOku([FromBody] SayfalamaBilgileri sb, string cariKodu)
         {
             Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Stok kartları okunamadı. (ls)";
+                return sonuc;
+            }
             List<StokKartBilgileri> skbListe = new List<StokKartBilgileri>();
             StokIslemleri si = new StokIslemleri();
             skbListe = si.StokKartlariniListeOku(sb);
@@ -115,6 +148,13 @@ namespace B2b_Api.Controllers
         public Sonuc AramadanStokkartlariniOku([FromBody] SayfalamaBilgileri sb)
         {
             Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Stok kartları okunamadı. (ls)";
+                return sonuc;
+            }
             StokIslemleri si = new StokIslemleri();
             sonuc = si.AramaStokKartlariniBul(sb);
             sonuc.servisUlasmaBasari = true;
@@ -125,6 +165,13 @@ namespace B2b_Api.Controllers
         public Sonuc AramadanStokkartlariniOku([FromBody] SayfalamaBilgileri sb, string cariKodu)
         {
             Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Stok kartları okunamadı. (ls)";
+                return sonuc;
+            }
             StokIslemleri si = new StokIslemleri();
             sonuc = si.AramaStokKartlariniBul(sb);
             int sayac = sonuc.ekData != null ? Convert.ToInt32(sonuc.ekData) : 0;
