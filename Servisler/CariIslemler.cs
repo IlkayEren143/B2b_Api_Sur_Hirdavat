@@ -540,6 +540,36 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
             sonuc.mesaj = "Başarılı";
             return sonuc;
         }
+        public Sonuc SifreKaydet(string kod, string sifre)
+        {
+            Sonuc sonuc = new Sonuc();
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+            SqlCommand komut = new SqlCommand();
+            komut.CommandType = System.Data.CommandType.StoredProcedure;
+            komut.CommandText = "SifreKaydet";
+            komut.Parameters.AddWithValue("@veriTabaniAdi", etaVeriTabani);
+            komut.Parameters.AddWithValue("@kod", kod);
+            komut.Parameters.AddWithValue("@sifre", sifre);
+            SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+            if (!asi.Komut_ExecuteNonQuery(komut))
+            {
+                sonuc.sonuc = false;
+                sonuc.mesaj = "Şifre kaydedilemedi." + asi.hataMesaji;
+                sonuc.veriOkuBasari = false;
+                sonuc.data = null;
+               
+            }
+            else
+            {
+                sonuc.sonuc = true;
+                sonuc.mesaj = "Şifre başarı ile kaydedildi.";
+                sonuc.veriOkuBasari = true;
+                sonuc.data = null;
+            }
+            return sonuc;
+        }
         public Sonuc CariEkstrePDFAl(string basTarih, string bitTarih, string cariKodu)
         {
             Sonuc sonuc = new Sonuc();
