@@ -918,5 +918,17 @@ namespace B2b_Api.Servisler
             }
             return eksorgu;
         }
+
+        public DataTable StokFiyatiniBul(string stokKodu, int fiyatNo)
+        {
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+            string komutstr = $"SELECT TOP 1 STKFIYTUTAR, STKFIYDOVKOD, STKFIYDOVTUR FROM {etaVeriTabani}..STKFIYAT WHERE STKFIYSTKKOD = '{stokKodu}' AND STKFIYNO = {fiyatNo}";
+            SqlCommand komut = new SqlCommand(komutstr);
+            SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
+            DataTable tablo = asi.Komut_Adaptor(komut);
+            return tablo;
+        }
     }
 }

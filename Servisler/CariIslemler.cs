@@ -1,5 +1,7 @@
 ﻿using B2b_Api.Models;
 using DevExpress.XtraReports.UI;
+using ETA_Kayit_Islemleri;
+using SQL_Genel_Islemleri;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -8,6 +10,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Web;
+using Sonuc = B2b_Api.Models.Sonuc;
 
 namespace B2b_Api.Servisler
 {
@@ -29,7 +32,7 @@ namespace B2b_Api.Servisler
             {
                 foreach (ListedenStokFiyatBilgileri sflb in fiyatListesi)
                 {
-                    if (skb.stokKodu == sflb.stokKodu)
+                    if (skb.grupKodu == sflb.stokKodu)
                     {
                         skb.kalemIndirim1 = sflb.kalemIndirimYuzde1;
                         skb.kalemIndirim2 = sflb.kalemIndirimYuzde2;
@@ -37,10 +40,22 @@ namespace B2b_Api.Servisler
                         skb.kalemIndirim4 = sflb.kalemIndirimYuzde4;
                         skb.kalemIndirim5 = sflb.kalemIndirimYuzde5;
                         skb.fiyat = sflb.fiyat;
+                       
                         skb.fiyatNo = sflb.fiyatNo;
                         skb.dovizKodu = sflb.dovizKodu;
                         skb.dovizTuru = sflb.dovizTuru;
-                        skb.netFiyat = sflb.netFiyat;
+                        if (skb.fiyat == 0)
+                        {
+                            StokFiyatiniBul(skb);
+                        }
+                        decimal netFiyat = skb.fiyat;
+
+                        netFiyat *= (1 - skb.kalemIndirim1 / 100);
+                        netFiyat *= (1 - skb.kalemIndirim2 / 100);
+                        netFiyat *= (1 - skb.kalemIndirim3 / 100);
+                        netFiyat *= (1 - skb.kalemIndirim4 / 100);
+                        netFiyat *= (1 - skb.kalemIndirim5 / 100);
+                        skb.netFiyat = netFiyat;
                         break;
                     }
                 }
@@ -50,13 +65,71 @@ namespace B2b_Api.Servisler
             sonuc.mesaj = "Başarılı";
             return sonuc;
         }
-        public DataRow CariAdresBilgileriniAl(string cariKodu)
+        /*{
+  "gecerliSayfaNo": 1,
+  "sayfaUzunlugu": 20,
+  "siralamaTipiFlag": 0,
+  "aramaTipiFlag": 0,
+  "karakterDuyarTipiFlag": 0,
+  "ekSorgu": "",
+  "veriSorgulama": {"stokKodu":"YG D13"}
+}*/
+        private StokKartBilgileri StokFiyatiniBul(StokKartBilgileri skb)
+        {
+            StokIslemleri si = new StokIslemleri();
+            DataTable tablo = si.StokFiyatiniBul(skb.stokKodu, skb.fiyatNo);
+            if (tablo == null)
+                return skb;
+            if (tablo.Rows.Count == 0)
+                return skb;
+            skb.fiyat = Convert.ToDecimal(tablo.Rows[0]["STKFIYTUTAR"]);
+            skb.dovizKodu = tablo.Rows[0]["STKFIYDOVKOD"].ToString();
+            skb.dovizTuru = tablo.Rows[0]["STKFIYDOVTUR"].ToString();
+            return skb;
+        }
+
+        public Sonuc AdresleriOku(string cariKodu)
+        {
+            Sonuc sonuc = new Sonuc();
+            List<AdresKartBilgileri> adresListesi = new List<AdresKartBilgileri>();
+            string hataMesaji = string.Empty;
+            DataTable tablo = AdresKartBilgileriniOku("WHERE ADRKOD1 = '" + cariKodu + "'", ref hataMesaji);
+            if (tablo == null)
+            {
+                sonuc.sonuc = false;
+                sonuc.mesaj = "Adres bilgileri bulunamadı. " + hataMesaji;
+                sonuc.veriOkuBasari = false;
+
+                return sonuc;
+            }
+            foreach (DataRow dr in tablo.Rows)
+            {
+                AdresKartBilgileri ab = new AdresKartBilgileri();
+                ab.siraNo = Convert.ToInt32(dr["ADRITEMNO"]);
+                ab.adres1 = dr["ADRADRES1"].ToString();
+                ab.adres2 = dr["ADRADRES2"].ToString();
+                ab.adres3 = dr["ADRADRES3"].ToString();
+
+
+                ab.il = dr["ADRIL"].ToString();
+                ab.ilce = dr["ADRILCE"].ToString();
+                ab.ulke = dr["ADRULKE"].ToString();
+                adresListesi.Add(ab);
+            }
+            sonuc.sonuc = true;
+            sonuc.veriOkuBasari = true;
+            sonuc.data = adresListesi;
+            sonuc.mesaj = "Başarılı";
+            return sonuc;
+        }
+
+        public DataRow CariAdresBilgileriniAl(string cariKodu, int adresNo)
         {
             DataTable tablo = new DataTable();
             string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
             SqlConnection baglanti = new SqlConnection(baglantistr);
             string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
-            string komutstr = $@"SELECT CARVERDAIRE, CARVERHESNO, ISNULL(ADRADRES1, '') AS ADRADRES1, ISNULL(ADRADRES2, '') AS ADRADRES2, ISNULL(ADRADRES3, '') AS ADRADRES3, ISNULL(ADREMAIL1, '') AS ADREMAIL1, ISNULL(ADREMAIL2, '') AS ADREMAIL2, ISNULL(ADRIL, '') AS ADRIL, ISNULL(ADRILCE, '') AS ADRILCE, ISNULL(ADRULKE, '') AS ADRULKE, ADRTEL1, ISNULL(KIMMERNISNO, '') AS KIMMERNISNO FROM {etaVeriTabani}..CARKART LEFT JOIN(SELECT ADRADRES1, ADRADRES2, ADRADRES3, ADREMAIL1, ADREMAIL2, ADRIL, ADRILCE, ADRULKE, ADRKOD1, ADRTEL1 FROM  {etaVeriTabani}..ADRESLER) ADRESLER ON ADRESLER.ADRKOD1 = CARKOD LEFT JOIN (select KIMKOD, KIMMERNISNO from {etaVeriTabani}..KIMLIKLER) KIMLIKLER ON KIMLIKLER.KIMKOD = CARKOD WHERE CARKOD = '{cariKodu}'";
+            string komutstr = $@"SELECT CARVERDAIRE, CARVERHESNO, ISNULL(ADRADRES1, '') AS ADRADRES1, ISNULL(ADRADRES2, '') AS ADRADRES2, ISNULL(ADRADRES3, '') AS ADRADRES3, ISNULL(ADREMAIL1, '') AS ADREMAIL1, ISNULL(ADREMAIL2, '') AS ADREMAIL2, ISNULL(ADREMAIL3, '') AS ADREMAIL3, ISNULL(ADRIL, '') AS ADRIL, ISNULL(ADRILCE, '') AS ADRILCE, ISNULL(ADRULKE, '') AS ADRULKE, ADRTEL1, ISNULL(KIMMERNISNO, '') AS KIMMERNISNO FROM {etaVeriTabani}..CARKART LEFT JOIN(SELECT ADRADRES1, ADRADRES2, ADRADRES3, ADREMAIL1, ADREMAIL2, ADREMAIL3, ADRITEMNO, ADRIL, ADRILCE, ADRULKE, ADRKOD1, ADRTEL1 FROM  {etaVeriTabani}..ADRESLER) ADRESLER ON ADRESLER.ADRKOD1 = CARKOD AND ADRITEMNO = {adresNo} LEFT JOIN (select KIMKOD, KIMMERNISNO from {etaVeriTabani}..KIMLIKLER) KIMLIKLER ON KIMLIKLER.KIMKOD = CARKOD WHERE CARKOD = '{cariKodu}'";
             SqlCommand komut = new SqlCommand(komutstr);
             SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
             tablo = asi.Komut_Adaptor(komut);
@@ -267,8 +340,37 @@ namespace B2b_Api.Servisler
                     }
                 }
             }
+            foreach (ListedenStokFiyatBilgileri bilgi in fiyatListesi)
+            {
+                if (bilgi.fiyatNo == 0)
+                {
+                    bilgi.fiyatNo = Convert.ToInt32(ConfigurationManager.AppSettings["fiyatNo"]);
+                }
+               
+            }
             return fiyatListesi;
         }
+        private List<ListedenStokFiyatBilgileri> CariListedenFiyatListesiOku2(string cariKodu)
+        {
+            List<ListedenStokFiyatBilgileri> fiyatListesi = new List<ListedenStokFiyatBilgileri>();
+            DataTable tabloCariFiyat = CariFiyatListesiniAl(cariKodu);
+            if (tabloCariFiyat != null && tabloCariFiyat.Rows.Count > 0)
+            {
+                for (int i = 0; i < tabloCariFiyat.Rows.Count; ++i)
+                {
+                    ListedenStokFiyatBilgileri lsfb = new ListedenStokFiyatBilgileri();
+                    lsfb.stokKodu = tabloCariFiyat.Rows[i]["Stok Kodu"].ToString();
+                    lsfb.fiyatNo = Convert.ToInt32(tabloCariFiyat.Rows[i]["Fiyat No"]);
+                    lsfb.kalemIndirimYuzde1 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 1"]);
+                    lsfb.kalemIndirimYuzde2 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 2"]);
+                    lsfb.kalemIndirimYuzde3 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 3"]);
+                    lsfb.kalemIndirimYuzde4 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 4"]);
+                    lsfb.kalemIndirimYuzde5 = Convert.ToDecimal(tabloCariFiyat.Rows[i]["İskonto Yüzde 5"]);
+                    fiyatListesi.Add(lsfb);
+                }
+            }
+            return fiyatListesi;
+        }   
         private DataTable CariFiyatListesiniAl(string cariKodu)
         {
             DataTable tablo = new DataTable();
@@ -286,17 +388,18 @@ namespace B2b_Api.Servisler
             string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
             SqlConnection baglanti = new SqlConnection(baglantistr);
             string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
-            string komutstr = $"SELECT CARFIYSTKTIP AS [Stok Tipi], CARFIYSTKKOD AS [Stok Kodu], CARFIYNO AS [Fiyat No], ISNULL(STKFIYTUTAR, 0) as Fiyat, ISNULL(STKFIYDOVKOD, '') AS [Döviz Kodu], ISNULL(STKFIYDOVTUR, '') as [Döviz Türü], CARFIYISKYUZ1 AS [İskonto Yüzde 1], CARFIYISKYUZ2 AS [İskonto Yüzde 2], CARFIYISKYUZ3 AS [İskonto Yüzde 3], CARFIYISKYUZ4 as [İskonto Yüzde 4], CARFIYISKYUZ5 as [İskonto Yüzde 5] FROM {etaVeriTabani}..CARFIYAT LEFT JOIN (SELECT STKFIYSTKKOD, STKFIYNO, STKFIYTUTAR, STKFIYDOVKOD, STKFIYDOVTUR FROM {etaVeriTabani}..STKFIYAT) sf ON STKFIYSTKKOD = CARFIYSTKKOD AND STKFIYNO = CARFIYNO WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM {etaVeriTabani}..CARKART WHERE CARKOD = '{cariKodu}') AND CARFIYKODTIP = 2 AND CARFIYITEMNO > 0";
+            string komutstr = $"SELECT CARFIYSTKTIP AS [Stok Tipi], CARFIYSTKKOD AS [Stok Kodu], CARFIYNO AS [Fiyat No], ISNULL(STKFIYTUTAR, 0) as Fiyat, ISNULL(STKFIYDOVKOD, '') AS [Döviz Kodu], ISNULL(STKFIYDOVTUR, '') as [Döviz Türü], CARFIYISKYUZ1 AS [İskonto Yüzde 1], CARFIYISKYUZ2 AS [İskonto Yüzde 2], CARFIYISKYUZ3 AS [İskonto Yüzde 3], CARFIYISKYUZ4 as [İskonto Yüzde 4], CARFIYISKYUZ5 as [İskonto Yüzde 5] FROM {etaVeriTabani}..CARFIYAT LEFT JOIN (SELECT STKFIYSTKKOD, STKFIYNO, STKFIYTUTAR, STKFIYDOVKOD, STKFIYDOVTUR FROM {etaVeriTabani}..STKFIYAT) sf ON STKFIYSTKKOD = CARFIYSTKKOD AND STKFIYNO = CARFIYNO WHERE CARFIYKOD = (SELECT CARFIYSTKKOD FROM {etaVeriTabani}..CARFIYAT WHERE CARFIYKOD  = (SELECT CARLISFIYNO FROM {etaVeriTabani}..CARKART WHERE CARKOD = '{cariKodu}') AND CARFIYSTKTIP = 3) AND CARFIYKODTIP = 2 AND CARFIYITEMNO > 0";
             /*seLECT CARFIYSTKTIP AS [Stok Tipi], CARFIYSTKKOD AS [Stok Kodu], CARFIYNO AS [Fiyat No], ISNULL(STKFIYTUTAR, 0) as Fiyat, ISNULL(STKFIYDOVKOD, '') AS [Döviz Kodu], 
 ISNULL(STKFIYDOVTUR, '') as [Döviz Türü] , CARFIYISKYUZ1 AS [İskonto Yüzde 1], CARFIYISKYUZ2 AS [İskonto Yüzde 2], 
 CARFIYISKYUZ3 AS [İskonto Yüzde 3], CARFIYISKYUZ4 as [İskonto Yüzde 4], CARFIYISKYUZ5 as [İskonto Yüzde 5] 
 FROM CARFIYAT 
 LEFT JOIN (SELECT STKFIYSTKKOD, STKFIYNO, STKFIYTUTAR, STKFIYDOVKOD, STKFIYDOVTUR FROM STKFIYAT) sf ON STKFIYSTKKOD = CARFIYSTKKOD AND STKFIYNO = CARFIYNO
 WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001') AND CARFIYKODTIP = 2 AND CARFIYITEMNO > 0*/
-            SqlCommand komut = new SqlCommand(komutstr);
+        SqlCommand komut = new SqlCommand(komutstr);
             SQL_Genel_Islemleri.Ana_SQL_Islemleri asi = new SQL_Genel_Islemleri.Ana_SQL_Islemleri(baglanti);
             return asi.Komut_Adaptor(komut);
         }
+        //(SELECT CARFIYSTKKOD FROM CARFIYAT WHERE CARFIYKOD  = (SELECT CARLISFIYNO FROM CARKART WHERE CARKOD = '120 01 O00001') AND CARFIYSTKTIP = 3)
         private Sonuc CariKartlariniAl(SayfalamaBilgileri sb)
         {
             Sonuc sonuc = new Sonuc();
@@ -336,15 +439,16 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
                 ckb.vergiNumarasi = tabloCari.Rows[i]["Vergi Numarası"].ToString();
                 ckb.kimlikNo = tabloCari.Rows[i]["Kimlik Numarası"].ToString();
                 ckb.yetkili = tabloCari.Rows[i]["Yetkili"].ToString();
-                ckb.adres1= tabloCari.Rows[i]["Adres1"].ToString();
-                ckb.adres2= tabloCari.Rows[i]["Adres2"].ToString();
-                ckb.adres3= tabloCari.Rows[i]["Adres3"].ToString();
-                ckb.il= tabloCari.Rows[i]["İl"].ToString();
-                ckb.ilce= tabloCari.Rows[i]["İlçe"].ToString();
-                ckb.ulke= tabloCari.Rows[i]["Ülke"].ToString();
+                ckb.adres1 = tabloCari.Rows[i]["Adres1"].ToString();
+                ckb.adres2 = tabloCari.Rows[i]["Adres2"].ToString();
+                ckb.adres3 = tabloCari.Rows[i]["Adres3"].ToString();
+                ckb.il = tabloCari.Rows[i]["İl"].ToString();
+                ckb.ilce = tabloCari.Rows[i]["İlçe"].ToString();
+                ckb.ulke = tabloCari.Rows[i]["Ülke"].ToString();
                 ckb.telefon = tabloCari.Rows[i]["Telefon"].ToString();
                 ckb.email = tabloCari.Rows[i]["Email"].ToString();
-                
+                ckb.temsilci = tabloCari.Rows[i]["Temsilci"].ToString();
+
                 ckbListe.Add(ckb);
             }
             sonuc.sonuc = true;
@@ -352,6 +456,7 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
             sonuc.mesaj = "Başarılı";
             return sonuc;
         }
+
         private int CariSayisiniBul()
         {
             Sonuc sonuc = new Sonuc();
@@ -498,7 +603,7 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
                 sonuc.data = null;
                 sonuc.ekData = 0;
                 sonuc.mesaj = asi.hataMesaji;
-               
+
                 return sonuc;
             }
             if (tabloCari.Rows.Count == 0)
@@ -531,7 +636,7 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
                 ckb.ulke = tabloCari.Rows[i]["Ülke"].ToString();
                 ckb.telefon = tabloCari.Rows[i]["Telefon"].ToString();
                 ckb.email = tabloCari.Rows[i]["Email"].ToString();
-
+                ckb.temsilci = tabloCari.Rows[i]["Temsilci"].ToString();
                 ckbListe.Add(ckb);
             }
             sonuc.sonuc = true;
@@ -559,7 +664,7 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
                 sonuc.mesaj = "Şifre kaydedilemedi." + asi.hataMesaji;
                 sonuc.veriOkuBasari = false;
                 sonuc.data = null;
-               
+
             }
             else
             {
@@ -718,6 +823,27 @@ WHERE CARFIYKOD = (SELECT CARLISFIYNO FROM  CARKART WHERE CARKOD = '120 01 001')
             }
 
             return ekstreTablo;
+        }
+        public DataTable AdresKartBilgileriniOku(string eksorgu, ref string hataMesaji)
+        {
+            string baglantistr = ConfigurationManager.ConnectionStrings["hrz_baglanti"].ConnectionString;
+            SqlConnection baglanti = new SqlConnection(baglantistr);
+            string etaVeriTabani = ConfigurationManager.AppSettings["etaVeriTabani"].ToString();
+            try
+            {
+
+                string komutstr = @"Select ADRITEMNO, ADRADRES1, ADRADRES2, ADRADRES3, ADRILCE, ADRIL,  ADRULKE from " + etaVeriTabani + @"..ADRESLER";
+                komutstr += " " + eksorgu;
+                Ana_SQL_Islemleri asi = new Ana_SQL_Islemleri(baglanti);
+                DataTable tablo =  asi.Sorgu_Adaptor(komutstr, false, "Adres Kart Bilgilerini Oku");
+                hataMesaji = asi.hataMesaji;
+                return tablo;
+            }
+            catch (Exception ex)
+            {
+              hataMesaji = ex.Message;
+                return null;
+            }
         }
 
     }

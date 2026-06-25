@@ -7,7 +7,7 @@ namespace B2b_Api.Models
 {
     public class StokKartBilgileri
     {
-        internal object fiyatNo;
+        internal int fiyatNo;
 
         public string stokKodu { get; set; }
         public string stokCinsi { get; set; }

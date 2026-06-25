@@ -256,6 +256,12 @@ namespace B2b_Api.Servisler
             eki.ebb.faturaAdres1 = fis["Adres1"].ToString();
             eki.ebb.faturaAdres2 = fis["Adres2"].ToString();
             eki.ebb.faturaAdres3 = fis["Adres3"].ToString();
+            eki.ebb.irsaliyeAdres1 = fis["SevkAdres1"].ToString();
+            eki.ebb.irsaliyeAdres2 = fis["SevkAdres2"].ToString();
+            eki.ebb.irsaliyeAdres3 = fis["SevkAdres3"].ToString();
+            eki.ebb.irsaliyeIl = fis["SevkIl"].ToString();
+            eki.ebb.irsaliyeIlce = fis["SevkIlce"].ToString();  
+            eki.ebb.irsaliyeUlke = fis["SevkUlke"].ToString();
             eki.ebb.faturaIl = fis["Il"].ToString();
             eki.ebb.faturaIlce = fis["Ilce"].ToString();
             eki.ebb.faturaTelefon = fis["TelefonNo"].ToString();
@@ -299,7 +305,9 @@ namespace B2b_Api.Servisler
                 esb.aciklama3 = satir["Aciklama3"].ToString();
                 esb.ozkod = satir["OzelKod"].ToString();
                 esb.birim = satir["Birim"].ToString();
-                esb.depoKod = eki.ebb.depoKodu;
+                esb.depoKod = satir["DepoKodu"].ToString();
+                if (string.IsNullOrEmpty(esb.depoKod))
+                    esb.depoKod = eki.ebb.depoKodu;
                 esb.dovizFiyat = Convert.ToDecimal(satir["Fiyat"]);
                 esb.kalemIndirim1 = Convert.ToDecimal(satir["IndirimYuzde1"]);
                 esb.kalemIndirim2 = Convert.ToDecimal(satir["IndirimYuzde2"]);

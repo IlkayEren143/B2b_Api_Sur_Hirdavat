@@ -114,5 +114,40 @@ namespace B2b_Api.Controllers
             sonuc = ci.CariEkstrePDFAl(baslangicTarihi, bitisTarihi, cariKodu);
             return sonuc;
         }
+
+        [HttpGet]
+        [Route("SifreDegistir/{cariKodu}/{yeniSifre}")]
+        public Sonuc GetSifreDegistir(string cariKodu, string yeniSifre)
+        {
+            Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Şifre değiştirilemedi.(ls)";
+                return sonuc;
+            }
+            CariIslemler ci = new CariIslemler();
+            sonuc = ci.SifreKaydet(cariKodu, yeniSifre);
+            sonuc.servisUlasmaBasari = true;
+            return sonuc;
+        }
+        [HttpGet]
+        [Route("AdresListesiniAl/{cariKodu}")]
+        public Sonuc GetAdresListesiniAl(string cariKodu)
+        {
+            Sonuc sonuc = new Sonuc();
+            LisansSistemi ls = new LisansSistemi();
+            sonuc = ls.LisansiKontrolEt();
+            if (!sonuc.sonuc)
+            {
+                sonuc.mesaj = "Adres listesi alınamadı.(ls)";
+                return sonuc;
+            }
+            CariIslemler ci = new CariIslemler();
+            sonuc = ci.AdresleriOku(cariKodu);
+            sonuc.servisUlasmaBasari = true;
+            return sonuc;
+        }
     }
 }

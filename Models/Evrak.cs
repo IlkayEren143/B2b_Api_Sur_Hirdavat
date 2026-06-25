@@ -32,5 +32,6 @@ namespace B2b_Api.Models
         public string attachmentUri { get; set; }
         public string baslik { get; set; }
         public bool isHTML { get; set; }
+        public string adresNo { get; set; } = 1.ToString();
     }
 }

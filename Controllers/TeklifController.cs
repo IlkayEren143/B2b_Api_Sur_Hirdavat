@@ -102,12 +102,12 @@ namespace B2b_Api.Controllers
 
         }
         [HttpGet]
-        [Route("SepetMailGonder/{cariKodu}")]
-        public async Task<Sonuc> GetSepetMailGonder(string cariKodu)
+        [Route("SepetMailGonder/{cariKodu}/{adresNo}")]
+        public async Task<Sonuc> GetSepetMailGonder(string cariKodu, int adresNo)
         {
             Sonuc sonuc = new Sonuc();
             TeklifIslemleri ti = new TeklifIslemleri();
-            sonuc = await ti.SepetMailYolla(cariKodu);
+            sonuc = await ti.SepetMailYolla(cariKodu, adresNo);
             sonuc.servisUlasmaBasari = true;
             return sonuc;
         }

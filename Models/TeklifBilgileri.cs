@@ -45,6 +45,14 @@ namespace B2b_Api.Models
         public object kimlikno { get; internal set; }
         public object email { get; internal set; }
         public object telefonno { get; internal set; }
+        public int adresNo { get; set; }
+        public string sevkadres1 { get; set; }
+        public string sevkadres2 { get; set; }
+        public string sevkadres3 { get; set; }
+        public string sevkilce { get; set; }
+        public string sevkil { get; set; }
+        public string sevkulke { get; set; }
+       
 
         public TeklifFisBilgileri()
         {
@@ -83,6 +91,13 @@ namespace B2b_Api.Models
             ulke = "";
             vergidairesi = "";
             verginumarasi = "";
+            adresNo = 0;
+            sevkadres1= "";
+            sevkadres2 = "";
+            sevkadres3 = "";    
+            sevkilce = ""; 
+            sevkil = "";
+            sevkulke = "";
         }
     }
 
